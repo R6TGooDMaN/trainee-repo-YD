@@ -1,12 +1,9 @@
 package org.trainee.productservice.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.trainee.productservice.dto.ProductRequest;
 import org.trainee.productservice.dto.ProductResponse;
+import org.trainee.productservice.mapper.ProductMapper;
 import org.trainee.productservice.model.Product;
 import org.trainee.productservice.repository.ProductRepository;
 
@@ -21,26 +18,43 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public void createProduct(ProductRequest productRequest){
-        Product product = Product.builder()
-                .name(productRequest.getName())
-                .description(productRequest.getDescription())
-                .price(productRequest.getPrice())
-                .build();
-        productRepository.save(product);
-
+    public ProductResponse createProduct(ProductRequest productRequest){
+        Product product = ProductMapper.mapToProduct(productRequest);
+        Product newProduct = productRepository.save(product);
+        return ProductMapper.mapToProductResponse(newProduct);
     }
+
+    public ProductResponse findProduct(Long id){
+        return productRepository.findById(id)
+                .map(ProductMapper::mapToProductResponse)
+                .orElse(null);
+    }
+
+    public ProductResponse updateProduct(Long id, ProductRequest productRequest){
+        return productRepository.findById(id)
+                .map(existingProduct -> {
+                    existingProduct.setName(productRequest.getName());
+                    existingProduct.setDescription(productRequest.getDescription());
+                    existingProduct.setPrice(productRequest.getPrice());
+                    Product newProduct = productRepository.save(existingProduct);
+                    return ProductMapper.mapToProductResponse(newProduct);
+                })
+                .orElse(null);
+    }
+
+    public boolean deleteProduct(Long id){
+        return productRepository.findById(id)
+                .map(product -> {
+                    productRepository.delete(product);
+                    return true;
+                })
+                .orElse(false);
+    }
+
     public List<ProductResponse> getAllProducts(){
-        List<Product> products = (List<Product>) productRepository.findAll();
-       return products.stream().map(product -> mapToProductResponse(product)).toList();
-    }
-
-    private ProductResponse mapToProductResponse(Product product) {
-        return ProductResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .price(product.getPrice())
-                .build();
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .map(ProductMapper::mapToProductResponse)
+                .toList();
     }
 }

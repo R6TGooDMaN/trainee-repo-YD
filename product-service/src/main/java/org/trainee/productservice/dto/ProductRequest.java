@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 @Data
 @Builder
@@ -13,5 +12,5 @@ import org.springframework.data.annotation.Id;
 public class ProductRequest {
     private String name;
     private String description;
-    private double price;
+    private int price;
 }
