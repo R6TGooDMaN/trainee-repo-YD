@@ -24,4 +24,12 @@ public class ProductMapper {
                 .price(productRequest.getPrice())
                 .build();
     }
+
+    public Product updateProductFromRequest(Product product, ProductRequest productRequest) {
+        product.setName(productRequest.getName());
+        product.setDescription(productRequest.getDescription());
+        product.setPrice(productRequest.getPrice());
+        return product;
+    }
+
 }

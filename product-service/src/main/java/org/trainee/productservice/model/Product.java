@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 @Data
 @Entity
 @Table(name = "product_table")
-@RequiredArgsConstructor
 public class Product {
     @Id
     @SequenceGenerator(name = "product_seq",

@@ -24,7 +24,7 @@ public class ProductController {
 
     }
 
-    @GetMapping("find/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> findProduct(@PathVariable Long id) {
         ProductResponse productResponse = productService.findProduct(id);
         return ResponseEntity.ok(productResponse);
@@ -45,11 +45,8 @@ public class ProductController {
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
-        boolean isDeleted = productService.deleteProduct(id);
-        if (!isDeleted){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
+       productService.deleteProduct(id);
+       return ResponseEntity.ok().build();
     }
 
 }
