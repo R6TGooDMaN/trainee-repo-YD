@@ -1,4 +1,3 @@
-
 spring:
   application:
     name: product-service
@@ -9,5 +8,12 @@ spring:
   cloud:
     config:
       fail-fast: true
+  flyway:
+    user: postgres
+    password: 12345679
+    schemas: product-schemas
+    url: jdbc:postgresql://localhost:5432/microservice-shop-database
+    enabled: true
+    locations: classpath:migration
 server:
   port: 8080

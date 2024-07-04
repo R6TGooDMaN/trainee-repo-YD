@@ -16,15 +16,15 @@ import lombok.Builder;
 @Builder
 @Data
 @Entity
-@Table(name = "product_table")
+@Table(name = "product")
 public class Product {
     @Id
-    @SequenceGenerator(name = "product_seq",
-            sequenceName = "product_sequence",
-            allocationSize = 25,
-            initialValue = 101
-    )
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_seq")
+//    @SequenceGenerator(name = "product_seq",
+//            sequenceName = "product_sequence",
+//            allocationSize = 25,
+//            initialValue = 101
+//    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_sequence")
     private Long id;
     private String name;
     private String description;
