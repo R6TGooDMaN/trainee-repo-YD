@@ -3,6 +3,7 @@ package org.trainee.productservice.service;
 import org.springframework.stereotype.Service;
 import org.trainee.productservice.dto.ProductRequest;
 import org.trainee.productservice.dto.ProductResponse;
+import org.trainee.productservice.exception.ProductNotFoundException;
 import org.trainee.productservice.mapper.ProductMapper;
 import org.trainee.productservice.model.Product;
 import org.trainee.productservice.repository.ProductRepository;
@@ -13,21 +14,21 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-
-    public ProductService(ProductRepository productRepository) {
+    private final ProductMapper productMapper;
+    public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
         this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
     public ProductResponse createProduct(ProductRequest productRequest){
-        Product product = ProductMapper.mapToProduct(productRequest);
+        Product product = productMapper.mapToProduct(productRequest);
         Product newProduct = productRepository.save(product);
-        return ProductMapper.mapToProductResponse(newProduct);
+        return productMapper.mapToProductResponse(newProduct);
     }
 
     public ProductResponse findProduct(Long id){
-        return productRepository.findById(id)
-                .map(ProductMapper::mapToProductResponse)
-                .orElse(null);
+        Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+        return productMapper.mapToProductResponse(product);
     }
 
     public ProductResponse updateProduct(Long id, ProductRequest productRequest){
@@ -37,9 +38,9 @@ public class ProductService {
                     existingProduct.setDescription(productRequest.getDescription());
                     existingProduct.setPrice(productRequest.getPrice());
                     Product newProduct = productRepository.save(existingProduct);
-                    return ProductMapper.mapToProductResponse(newProduct);
+                    return productMapper.mapToProductResponse(newProduct);
                 })
-                .orElse(null);
+                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
     }
 
     public boolean deleteProduct(Long id){
@@ -48,13 +49,13 @@ public class ProductService {
                     productRepository.delete(product);
                     return true;
                 })
-                .orElse(false);
+                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
     }
 
     public List<ProductResponse> getAllProducts(){
         List<Product> products = productRepository.findAll();
         return products.stream()
-                .map(ProductMapper::mapToProductResponse)
+                .map(productMapper::mapToProductResponse)
                 .toList();
     }
 }

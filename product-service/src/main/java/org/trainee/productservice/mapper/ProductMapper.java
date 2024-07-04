@@ -1,11 +1,14 @@
 package org.trainee.productservice.mapper;
 
+import org.springframework.stereotype.Component;
 import org.trainee.productservice.dto.ProductRequest;
 import org.trainee.productservice.dto.ProductResponse;
 import org.trainee.productservice.model.Product;
 
+
+@Component
 public class ProductMapper {
-    public static ProductResponse mapToProductResponse(Product product) {
+    public ProductResponse mapToProductResponse(Product product) {
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -13,7 +16,8 @@ public class ProductMapper {
                 .price(product.getPrice())
                 .build();
     }
-    public static Product mapToProduct(ProductRequest productRequest) {
+
+    public Product mapToProduct(ProductRequest productRequest) {
         return Product.builder()
                 .name(productRequest.getName())
                 .description(productRequest.getDescription())
