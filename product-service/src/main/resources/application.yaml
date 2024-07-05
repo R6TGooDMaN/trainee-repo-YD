@@ -14,6 +14,6 @@ spring:
     schemas: product-schemas
     url: jdbc:postgresql://localhost:5432/microservice-shop-database
     enabled: true
-    locations: filesystem:migration-service/scr/main/resources/migration
+    locations: filesystem:D:/repos/trainee-repo-YD/migration-service/src/main/resources/migration
 server:
   port: 8080
