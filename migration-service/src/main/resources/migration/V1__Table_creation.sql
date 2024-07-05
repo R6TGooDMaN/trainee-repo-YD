@@ -1,0 +1,38 @@
+CREATE TABLE IF NOT EXISTS product(
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE ,
+    description VARCHAR(50) NOT NULL,
+    price INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS users(
+    id BIGINT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE ,
+    email VARCHAR(50) NOT NULL UNIQUE ,
+    password VARCHAR(50) NOT NULL,
+    phone VARCHAR(50) NOT NULL UNIQUE ,
+    role VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS orders(
+    id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    order_number BIGINT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS product_orders(
+    product_id BIGINT NOT NULL,
+    order_id BIGINT NOT NULL,
+    quantity INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS stock(
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS stock_product(
+    stock_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    quantity INTEGER NOT NULL
+);

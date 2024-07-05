@@ -15,10 +15,10 @@ import java.util.List;
 @Service
 public class ProductService {
 
-    private static final String PRODUCT_NOT_FOUND_MESSAGE = "Entity with name: {0} with ID: {1} not found";
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private static final String PRODUCT_NOT_FOUND_MESSAGE = "Entity with name: {0} with ID: {1} not found";
 
     public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
         this.productRepository = productRepository;

@@ -9,6 +9,8 @@ import org.trainee.productservice.exception.EntityNotFoundException;
 @RestControllerAdvice
 public class ExceptionHandlerApi {
 
+    private static final String HANDLER_ERROR_MESSAGE = "An unexpected error occurred: ";
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleProductNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
@@ -16,6 +18,6 @@ public class ExceptionHandlerApi {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(HANDLER_ERROR_MESSAGE + ex.getMessage());
     }
 }
