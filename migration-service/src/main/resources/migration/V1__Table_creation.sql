@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS product(
     id BIGINT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE ,
-    description VARCHAR(50) NOT NULL,
-    price INTEGER NOT NULL
+    name VARCHAR(300) NOT NULL UNIQUE ,
+    description VARCHAR(600) NOT NULL,
+    price INTEGER NOT NULL CHECK (price > 0)
 );
 
 CREATE TABLE IF NOT EXISTS users(
@@ -10,14 +10,19 @@ CREATE TABLE IF NOT EXISTS users(
     username VARCHAR(50) NOT NULL UNIQUE ,
     email VARCHAR(50) NOT NULL UNIQUE ,
     password VARCHAR(50) NOT NULL,
-    phone VARCHAR(50) NOT NULL UNIQUE ,
+    phone VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS roles(
+    user_id BIGINT NOT NULL,
     role VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS orders(
     id BIGINT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    order_number BIGINT NOT NULL UNIQUE
+    order_number BIGINT NOT NULL UNIQUE,
+    order_date DATE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS product_orders(
