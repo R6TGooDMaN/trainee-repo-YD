@@ -7,10 +7,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,7 +32,8 @@ public class Product {
     private String name;
     private String description;
 
-    @Column(columnDefinition = "INTEGER CHECK (price > 0)")
+    @Min(value=1, message="Price must be grated than zero")
+    @Column()
     private Integer price;
 
 }

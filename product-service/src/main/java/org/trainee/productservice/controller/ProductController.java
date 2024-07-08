@@ -1,7 +1,9 @@
 package org.trainee.productservice.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.trainee.productservice.dto.ProductRequest;
 import org.trainee.productservice.dto.ProductResponse;
@@ -11,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping ("/api/v1/product")
+@Validated
 public class ProductController {
     private final ProductService productService;
     public ProductController(ProductService productService) {
@@ -18,7 +21,7 @@ public class ProductController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest productRequest){
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest productRequest){
         ProductResponse productResponse = productService.createProduct(productRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(productResponse);
 
@@ -38,7 +41,7 @@ public class ProductController {
 
     @PutMapping("update/{id}")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id,
-                                                         @RequestBody ProductRequest productRequest){
+                                                         @Valid @RequestBody ProductRequest productRequest){
         ProductResponse productResponse = productService.updateProduct(id, productRequest);
         return ResponseEntity.ok(productResponse);
     }
