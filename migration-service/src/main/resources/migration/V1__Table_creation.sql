@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS product(
 CREATE TABLE IF NOT EXISTS users(
     id BIGINT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE ,
-    email VARCHAR(50) NOT NULL UNIQUE ,
+    email VARCHAR(50) NOT NULL UNIQUE CHECK ( email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' ) ,
     password VARCHAR(50) NOT NULL,
-    phone VARCHAR(50) NOT NULL UNIQUE
+    phone VARCHAR(50) NOT NULL UNIQUE CHECK ( phone ~* '^\+\d{12}$' )
 );
 
 CREATE TABLE IF NOT EXISTS roles(
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS orders(
     order_date DATE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS product_orders(
+CREATE TABLE IF NOT EXISTS product_order(
     product_id BIGINT NOT NULL,
     order_id BIGINT NOT NULL,
     quantity INTEGER NOT NULL
