@@ -33,7 +33,7 @@ public class Product {
     private String description;
 
     @Min(value=1, message="Price must be grated than zero")
-    @Column()
+    @Column(nullable = false)
     private Integer price;
 
 }
