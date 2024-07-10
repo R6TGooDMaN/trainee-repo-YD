@@ -1,6 +1,9 @@
 package org.trainee.productservice.dto;
 
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +16,16 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 @Validated
 public class ProductRequest {
-    @Valid
+
+    @NotBlank
+    @Size(min = 1, max = 300)
     private String name;
-    @Valid
+
+    @NotBlank
+    @Size(min = 1, max = 600)
     private String description;
-    @Valid
+
+    @NotNull
+    @Positive
     private Integer price;
 }
