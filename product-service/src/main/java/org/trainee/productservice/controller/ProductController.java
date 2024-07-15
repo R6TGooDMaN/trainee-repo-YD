@@ -28,7 +28,6 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @Valid
     @PostMapping("/save")
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest productRequest) {
         ProductResponse productResponse = productService.createProduct(productRequest);
@@ -36,21 +35,18 @@ public class ProductController {
 
     }
 
-    @Valid
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> findProduct(@PathVariable Long id) {
         ProductResponse productResponse = productService.findProduct(id);
         return ResponseEntity.ok(productResponse);
     }
 
-    @Valid
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
         List<ProductResponse> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
-    @Valid
     @PutMapping("update/{id}")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id,
                                                          @Valid @RequestBody ProductRequest productRequest) {
