@@ -18,6 +18,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,8 +97,8 @@ public class ProductServiceTest {
     //пока что не готов, еще не разобрался
     @Test
     public void ProductService_DeleteProductTest() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        assertDoesNotThrow(() -> productService.deleteProduct(1L));
+        productService.deleteProduct(1L);
+        verify(productRepository, times(1)).deleteById(1L);
     }
 
 }
