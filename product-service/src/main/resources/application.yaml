@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        default_schema: product-schemas
+  application:
+    name: product-service
+  profiles:
+    active: dev
+  config:
+    import: optional:configserver:http://localhost:8888
+  cloud:
+    config:
+      fail-fast: true
+  flyway:
+    user: postgres
+    password: 12345679
+    schemas: product-schemas
+    url: jdbc:postgresql://localhost:5432/microservice-shop-database
+    enabled: true
+    locations: filesystem:D:/repos/trainee-repo-YD/migration-service/src/main/resources/migration
+server:
+  port: 8080
