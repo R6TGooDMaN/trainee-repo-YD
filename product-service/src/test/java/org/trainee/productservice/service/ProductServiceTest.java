@@ -40,6 +40,7 @@ public class ProductServiceTest {
     private Product product;
     private ProductRequest productRequest;
     private ProductResponse productResponse;
+    String EXPECTED_MESSAGE = "Entity with name: PRODUCT with ID: 999 not found";
 
     @BeforeEach
     public void setUp() {
@@ -113,10 +114,9 @@ public class ProductServiceTest {
             productService.findProduct(999L);
         });
 
-        String expectedMessage = "Entity with name: PRODUCT with ID: 999 not found";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertTrue(actualMessage.contains(expectedMessage));
+        Assertions.assertTrue(actualMessage.contains(EXPECTED_MESSAGE));
 
         verify(productRepository, times(1)).findById(999L);
         verifyNoMoreInteractions(productRepository);
@@ -131,10 +131,9 @@ public class ProductServiceTest {
             productService.updateProduct(999L, productRequest);
         });
 
-        String expectedMessage = "Entity with name: PRODUCT with ID: 999 not found";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertTrue(actualMessage.contains(expectedMessage));
+        Assertions.assertTrue(actualMessage.contains(EXPECTED_MESSAGE));
 
         verify(productRepository, times(1)).findById(999L);
         verifyNoMoreInteractions(productRepository);
@@ -147,10 +146,9 @@ public class ProductServiceTest {
             productService.deleteProduct(999L);
         });
 
-        String expectedMessage = "Entity with name: PRODUCT with ID: 999 not found";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertTrue(actualMessage.contains(expectedMessage));
+        Assertions.assertTrue(actualMessage.contains(EXPECTED_MESSAGE));
 
         verify(productRepository, times(1)).findById(999L);
         verifyNoMoreInteractions(productRepository);

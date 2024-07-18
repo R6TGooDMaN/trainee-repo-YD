@@ -1,6 +1,7 @@
 package org.trainee.productservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -29,14 +30,26 @@ public class ProductControllerTest extends TestConfiguration {
     private ProductRepository productRepository;
 
 
-    @Test
-    public void ProductController_CreateProductTest() throws Exception {
-        ProductRequest productRequest = ProductRequest.builder()
-                .name("Test Product")
-                .description("Test Description")
+    private ProductRequest productRequest;
+    private Product product;
+
+    @BeforeEach
+    public void setUp() {
+        product = Product.builder()
+                .id(1L)
+                .name("Product Name")
+                .description("Product Desc")
                 .price(100)
                 .build();
+        productRequest = ProductRequest.builder()
+                .name("Product Name")
+                .description("Product Desc")
+                .price(100)
+                .build();
+    }
 
+    @Test
+    public void ProductController_CreateProductTest() throws Exception {
         ResultActions resultActions = mockMvc.perform(post("/api/v1/product/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(productRequest)));
@@ -49,11 +62,7 @@ public class ProductControllerTest extends TestConfiguration {
 
     @Test
     public void ProductController_CreateProductNegativePriceTest() throws Exception {
-        ProductRequest productRequest = ProductRequest.builder()
-                .name("Test Product")
-                .description("Test Description")
-                .price(-100)
-                .build();
+        productRequest.setPrice(-100);
 
         ResultActions resultActions = mockMvc.perform(post("/api/v1/product/save")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -64,10 +73,6 @@ public class ProductControllerTest extends TestConfiguration {
 
     @Test
     public void ProductController_FindProductTest() throws Exception {
-        Product product = new Product();
-        product.setName("Test Product");
-        product.setDescription("Test Description");
-        product.setPrice(100);
         Product savedProduct = productRepository.save(product);
 
         Long productId = savedProduct.getId();
@@ -91,10 +96,6 @@ public class ProductControllerTest extends TestConfiguration {
 
     @Test
     public void ProductController_DeleteProductTest() throws Exception {
-        Product product = new Product();
-        product.setName("Test Product");
-        product.setDescription("Test Description");
-        product.setPrice(100);
         Product savedProduct = productRepository.save(product);
 
         Long productId = savedProduct.getId();
