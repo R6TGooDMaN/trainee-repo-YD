@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.trainee.productservice.dto.ProductRequest;
 import org.trainee.productservice.dto.ProductResponse;
+import org.trainee.productservice.mapper.ProductMapper;
+import org.trainee.productservice.repository.ProductRepository;
 import org.trainee.productservice.service.ProductService;
 
 import java.util.List;
@@ -23,10 +25,11 @@ import java.util.List;
 @Validated
 public class ProductController {
     private final ProductService productService;
-
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductRepository productRepository) {
         this.productService = productService;
     }
+
+
 
     @PostMapping("/save")
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest productRequest) {

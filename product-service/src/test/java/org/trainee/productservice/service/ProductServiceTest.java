@@ -1,4 +1,4 @@
-package service;
+package org.trainee.productservice.service;
 
 
 import org.junit.jupiter.api.BeforeEach;
@@ -7,20 +7,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
 import org.trainee.productservice.dto.ProductRequest;
 import org.trainee.productservice.dto.ProductResponse;
 import org.trainee.productservice.mapper.ProductMapper;
 import org.trainee.productservice.model.Product;
 import org.trainee.productservice.repository.ProductRepository;
-import org.trainee.productservice.service.ProductService;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
@@ -31,9 +34,11 @@ public class ProductServiceTest {
     private ProductMapper productMapper;
     @InjectMocks
     private ProductService productService;
-
+    @Mock
     private Product product;
+    @Mock
     private ProductRequest productRequest;
+    @Mock
     private ProductResponse productResponse;
 
     @BeforeEach
@@ -93,12 +98,18 @@ public class ProductServiceTest {
         assertEquals(productResponse, result);
     }
 
-
-    //пока что не готов, еще не разобрался
     @Test
     public void ProductService_DeleteProductTest() {
         productService.deleteProduct(1L);
         verify(productRepository, times(1)).deleteById(1L);
     }
 
+    @Test
+    public void ProductService_CreateProductNegativeTest() {
+        when(productMapper.mapToProduct(productRequest)).thenReturn(product);
+        doThrow(DataAccessException.class).when(productRepository.save(product));
+
+        assertThrows(DataAccessException.class, () -> productService.createProduct(productRequest));
+
+    }
 }
