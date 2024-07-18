@@ -49,6 +49,8 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
+        String message = MessageFormat.format(PRODUCT_NOT_FOUND_MESSAGE, EntityType.PRODUCT.name(), id);
+        productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(message));
         productRepository.deleteById(id);
     }
 

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.trainee.productservice.configuration.TestConfiguration;
 import org.trainee.productservice.dto.ProductRequest;
 import org.trainee.productservice.model.Product;
 import org.trainee.productservice.repository.ProductRepository;
@@ -16,7 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ProductControllerTest extends TestConfiguration{
+public class ProductControllerTest extends TestConfiguration {
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,7 +30,7 @@ public class ProductControllerTest extends TestConfiguration{
 
 
     @Test
-    public void testCreateProduct() throws Exception {
+    public void ProductController_CreateProductTest() throws Exception {
         ProductRequest productRequest = ProductRequest.builder()
                 .name("Test Product")
                 .description("Test Description")
@@ -47,7 +48,7 @@ public class ProductControllerTest extends TestConfiguration{
     }
 
     @Test
-    public void testCreateProductWithInvalidPrice() throws Exception {
+    public void ProductController_CreateProductNegativePriceTest() throws Exception {
         ProductRequest productRequest = ProductRequest.builder()
                 .name("Test Product")
                 .description("Test Description")
@@ -62,7 +63,7 @@ public class ProductControllerTest extends TestConfiguration{
     }
 
     @Test
-    public void testFindProduct() throws Exception {
+    public void ProductController_FindProductTest() throws Exception {
         Product product = new Product();
         product.setName("Test Product");
         product.setDescription("Test Description");
@@ -81,17 +82,15 @@ public class ProductControllerTest extends TestConfiguration{
     }
 
     @Test
-    public void testFindNonExistentProduct() throws Exception {
-        Long nonExistentProductId = 999L;
-
-        ResultActions resultActions = mockMvc.perform(get("/api/v1/product/" + nonExistentProductId)
+    public void ProductController_FindNotExistingProductTest() throws Exception {
+        ResultActions resultActions = mockMvc.perform(get("/api/v1/product/" + 999)
                 .contentType(MediaType.APPLICATION_JSON));
 
         resultActions.andExpect(status().isNotFound());
     }
 
     @Test
-    public void testDeleteProduct() throws Exception {
+    public void ProductController_DeleteProductTest() throws Exception {
         Product product = new Product();
         product.setName("Test Product");
         product.setDescription("Test Description");
@@ -107,12 +106,9 @@ public class ProductControllerTest extends TestConfiguration{
     }
 
     @Test
-    public void testDeleteNonExistentProduct() throws Exception {
-        Long nonExistentProductId = 999L;
-
-        ResultActions resultActions = mockMvc.perform(delete("/api/v1/product/delete/" + nonExistentProductId)
+    public void ProductController_DeleteNotExistingProductTest() throws Exception {
+        ResultActions resultActions = mockMvc.perform(delete("/api/v1/product/delete/" + 999)
                 .contentType(MediaType.APPLICATION_JSON));
-
         resultActions.andExpect(status().isNotFound());
     }
 }
