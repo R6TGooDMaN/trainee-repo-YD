@@ -8,6 +8,7 @@
     <modules>
         <module>product-service</module>
         <module>migration-service</module>
+        <module>inventory-service</module>
     </modules>
 
     <dependencyManagement>

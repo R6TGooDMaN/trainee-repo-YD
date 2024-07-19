@@ -1,5 +1,6 @@
 package org.trainee.inventoryservice.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,6 +33,8 @@ public class Inventory {
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "stock_seq")
     private Long id;
+
+    @Column(nullable = false)
     private String name;
 
     @ManyToMany
