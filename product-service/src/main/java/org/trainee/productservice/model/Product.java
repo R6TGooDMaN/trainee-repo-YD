@@ -6,7 +6,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
@@ -14,7 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.trainee.inventoryservice.model.Inventory;
+import org.trainee.stockservice.model.Stock;
 
 import java.util.List;
 
@@ -41,6 +40,6 @@ public class Product {
     private Integer price;
 
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "products")
-    private List<Inventory> inventories;
+    private List<Stock> inventories;
 
 }

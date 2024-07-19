@@ -1,4 +1,4 @@
-package org.trainee.inventoryservice.model;
+package org.trainee.stockservice.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +25,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Inventory {
+public class Stock {
     @Id
     @SequenceGenerator(name = "stock_seq",
             sequenceName = "stock_sequence",
