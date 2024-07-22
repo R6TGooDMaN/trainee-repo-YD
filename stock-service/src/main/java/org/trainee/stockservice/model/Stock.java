@@ -38,7 +38,7 @@ public class Stock {
     private String name;
 
     @ManyToMany
-    @JoinTable(name = "product-order",
+    @JoinTable(name = "stock_product",
             joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stock_id", referencedColumnName = "id"))
     private List<Product> products;
