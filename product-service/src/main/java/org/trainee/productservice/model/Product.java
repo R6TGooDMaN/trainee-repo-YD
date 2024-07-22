@@ -1,11 +1,11 @@
 package org.trainee.productservice.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.trainee.stockservice.model.Stock;
+import org.trainee.stockservice.model.StockProduct;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class Product {
     @Column(nullable = false)
     private Integer price;
 
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "products")
-    private List<Stock> inventories;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StockProduct> stockProducts;
 
 }
