@@ -1,6 +1,5 @@
 package org.trainee.stockservice.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,14 +14,12 @@ import org.trainee.stockservice.model.Stock;
 import org.trainee.stockservice.service.StockService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/stock")
 public class StockController {
     private final StockService stockService;
 
-    @Autowired
     public StockController(StockService stockService) {
         this.stockService = stockService;
     }
@@ -34,8 +31,8 @@ public class StockController {
 
     @GetMapping("/{id}")
     public ResponseEntity<StockResponse> getStockById(@PathVariable Long id) {
-        Optional<StockResponse> stock = stockService.getStockById(id);
-        return stock.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        StockResponse stock = stockService.getStockById(id);
+        return ResponseEntity.ok(stock);
     }
 
     @PostMapping("/{stockId}/save/{productId}")

@@ -1,5 +1,6 @@
 package org.trainee.stockservice.mapper;
 
+import lombok.experimental.UtilityClass;
 import org.trainee.productservice.model.Product;
 import org.trainee.stockservice.dto.StockProductRequest;
 import org.trainee.stockservice.dto.StockProductResponse;
@@ -8,44 +9,45 @@ import org.trainee.stockservice.dto.StockResponse;
 import org.trainee.stockservice.model.Stock;
 import org.trainee.stockservice.model.StockProduct;
 
-public interface StockMapper {
+@UtilityClass
+public class StockMapper {
 
-    static Stock requestToStock(StockRequest stockRequest) {
-        Stock stock = new Stock();
-        stock.setName(stockRequest.getName());
-        stock.setStockProducts(stockRequest.getStockProductRequests()
-                .stream()
-                .map(StockMapper::requestToStockProduct)
-                .toList());
-        return stock;
+    public static Stock requestToStock(StockRequest stockRequest) {
+        return Stock.builder()
+                .name(stockRequest.getName())
+                .stockProducts(stockRequest.getStockProductRequests()
+                        .stream()
+                        .map(StockMapper::requestToStockProduct)
+                        .toList())
+                .build();
     }
 
-    static StockResponse stockToResponse(Stock stock) {
-        StockResponse stockResponse = new StockResponse();
-        stockResponse.setId(stock.getId());
-        stockResponse.setName(stock.getName());
-        stockResponse.setStockProductResponses(stock.getStockProducts().stream()
-                .map(StockMapper::stockProductToResponse)
-                .toList());
-        return stockResponse;
+    public static StockResponse stockToResponse(Stock stock) {
+        return StockResponse.builder()
+                .id(stock.getId())
+                .name(stock.getName())
+                .stockProductResponses(stock.getStockProducts().stream()
+                        .map(StockMapper::stockProductToResponse)
+                        .toList())
+                .build();
     }
 
-    static StockProductResponse stockProductToResponse(StockProduct stockProduct) {
-        StockProductResponse stockProductResponse = new StockProductResponse();
-        stockProductResponse.setProductId(stockProduct.getProduct().getId());
-        stockProductResponse.setStockId(stockProduct.getStock().getId());
-        stockProductResponse.setQuantity(stockProduct.getQuantity());
-        return stockProductResponse;
+    public static StockProductResponse stockProductToResponse(StockProduct stockProduct) {
+        return StockProductResponse.builder()
+                .productId(stockProduct.getProduct().getId())
+                .stockId(stockProduct.getStock().getId())
+                .quantity(stockProduct.getQuantity())
+                .build();
     }
 
-    static StockProduct requestToStockProduct(StockProductRequest stockProductRequest) {
-        StockProduct stockProduct = new StockProduct();
-        Product product = new Product();
-        Stock stock = new Stock();
-        product.setId(stockProductRequest.getProductId());
-        stockProduct.setProduct(product);
-        stockProduct.setStock(stock);
-        stockProduct.setQuantity(stockProductRequest.getQuantity());
-        return stockProduct;
+    public static StockProduct requestToStockProduct(StockProductRequest stockProductRequest) {
+        Product product = Product.builder()
+                .id(stockProductRequest.getProductId())
+                .build();
+
+        return StockProduct.builder()
+                .product(product)
+                .quantity(stockProductRequest.getQuantity())
+                .build();
     }
 }

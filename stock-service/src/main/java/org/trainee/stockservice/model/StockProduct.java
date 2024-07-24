@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import org.trainee.stockservice.key.StockProductKey;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class StockProduct {
 
     @EmbeddedId
