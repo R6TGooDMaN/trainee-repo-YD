@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/microservice-shop-database
+    username: postgres
+    password: 12345679
+    driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8888/auth/realms/services-dev-realm
+keycloak:
+  realm: services-dev-realm
+  auth-server-url: http://localhost:8888/auth
+  resource: user-service
+  public-client: true
+  ssl-required: external
+  confidential-port: 0
+
+server:
+  port: 8082
