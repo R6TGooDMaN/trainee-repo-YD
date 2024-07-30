@@ -1,0 +1,19 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        default_schema: product-schemas
+  application:
+    name: stock-service
+  cloud:
+    config:
+      import-check:
+        enabled: false
+      fail-fast: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/microservice-shop-database
+    username: postgres
+    password: 12345679
+server:
+  port: 8081

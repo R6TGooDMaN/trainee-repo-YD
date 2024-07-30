@@ -1,4 +1,22 @@
 spring:
+  flyway:
+    user: postgres
+    password: 12345679
+    schemas: product-schemas
+    url: jdbc:postgresql://localhost:5432/microservice-shop-database
+    enabled: true
+    locations: filesystem:D:/repos/trainee-repo-YD/migration-service/src/main/resources/migration
+    default-schema: product-schemas
+    baseline-on-migrate: true
+  cloud:
+    config:
+      import-check:
+        enabled: false
+      fail-fast: true
+  jpa:
+    properties:
+      hibernate:
+        default_schema: product-schemas
   application:
     name: user-service
   datasource:
@@ -8,16 +26,13 @@ spring:
     driver-class-name: org.postgresql.Driver
   security:
     oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8888/realms/services-dev-realm
+            user-name-attribute: preferred_username
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8888/auth/realms/services-dev-realm
-keycloak:
-  realm: services-dev-realm
-  auth-server-url: http://localhost:8888/auth
-  resource: user-service
-  public-client: true
-  ssl-required: external
-  confidential-port: 0
-
+          issuer-uri: http://localhost:8888/realms/services-dev-realm
 server:
   port: 8082
