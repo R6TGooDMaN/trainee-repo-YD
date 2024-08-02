@@ -26,12 +26,31 @@ spring:
     driver-class-name: org.postgresql.Driver
   security:
     oauth2:
-      client:
-        provider:
-          keycloak:
-            issuer-uri: http://localhost:8888/realms/services-dev-realm
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8888/realms/services-dev-realm
+      client:
+        registration:
+          keycloak:
+            client-id:
+              user-service
+            authorization-grant-type:
+              authorization_code
+            scope:
+              openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8888/realms/services-dev-realm
+            user-name-attribute: preferred_username
 server:
   port: 8082
+
+keycloak:
+  auth-server-url: http://localhost:8888/auth
+  realm: services-dev-realm
+  resource: user-service
+  credentials:
+    secret: s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5
+keycloak-admin:
+  username: admin
+  password: admin

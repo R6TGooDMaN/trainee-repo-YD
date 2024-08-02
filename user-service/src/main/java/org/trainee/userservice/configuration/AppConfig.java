@@ -1,5 +1,9 @@
 package org.trainee.userservice.configuration;
 
+import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -8,6 +12,23 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakServerUrl;
+
+    @Value("${keycloak.realm}")
+    private String realm;
+
+    @Value("${keycloak.resource}")
+    private String clientId;
+
+    @Value("${keycloak.credentials.secret}")
+    private String clientSecret;
+
+    @Value("${keycloak-admin.username}")
+    private String adminUsername;
+
+    @Value("${keycloak-admin.password}")
+    private String adminPassword;
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
@@ -16,24 +37,17 @@ public class AppConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-//    @Bean
-//    public ClientRegistrationRepository clientRegistrationRepository() {
-//        return new InMemoryClientRegistrationRepository(
-//                googleClientRegistration()
-//        );
-//    }
 
-//    private ClientRegistration googleClientRegistration() {
-//        return ClientRegistration.withRegistrationId("google")
-//                .clientId("YOUR_GOOGLE_CLIENT_ID")
-//                .clientSecret("YOUR_GOOGLE_CLIENT_SECRET")
-//                .scope("profile", "email")
-//                .authorizationUri("https://accounts.google.com/o/oauth2/auth")
-//                .tokenUri("https://oauth2.googleapis.com/token")
-//                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
-//                .userNameAttributeName(IdTokenClaimNames.SUB)
-//                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-//                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-//                .build();
-//    }
+    @Bean
+    public Keycloak keycloakAdmin() {
+        return KeycloakBuilder.builder()
+                .serverUrl(keycloakServerUrl)
+                .realm(realm)
+                .grantType(OAuth2Constants.PASSWORD)
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .username(adminUsername)
+                .password(adminPassword)
+                .build();
+    }
 }
