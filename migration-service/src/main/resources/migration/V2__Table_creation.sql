@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS users(
     username VARCHAR(50) NOT NULL UNIQUE ,
     email VARCHAR(50) NOT NULL UNIQUE CHECK ( email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' ) ,
     password VARCHAR(50) NOT NULL,
-    phone VARCHAR(50) NOT NULL UNIQUE CHECK ( phone ~* '^\+\d{12}$' )
+    phone VARCHAR(50) NOT NULL UNIQUE CHECK ( phone ~* '^\+\d{12}$' ),
+    roles VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS roles(
