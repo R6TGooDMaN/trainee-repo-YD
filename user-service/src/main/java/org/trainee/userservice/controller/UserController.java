@@ -37,7 +37,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequest user) {
         UserResponseDto userCreated = userService.createUser(user);
         return ResponseEntity.ok(userCreated);
@@ -46,8 +46,6 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
-
-
 }

@@ -8,15 +8,20 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.trainee.productservice.enums.EntityType;
 import org.trainee.productservice.exception.EntityNotFoundException;
 import org.trainee.userservice.dto.UserRequest;
 import org.trainee.userservice.dto.UserResponseDto;
+import org.trainee.userservice.mapper.UserMapper;
 import org.trainee.userservice.model.User;
 import org.trainee.userservice.repository.UserRepository;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.trainee.userservice.mapper.UserMapper.toUserResponseDTO;
 
 @Service
 public class UserService {
@@ -25,6 +30,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final Keycloak keycloak;
     private final String realm;
+    private final String ERROR_MESSAGE = "Failed to create user with name:{0} and email:{1}";
+    private static final String USER_NOT_FOUND_MESSAGE = "Entity with name: {0} with ID: {1} not found";
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, Keycloak keycloak, @Value("${keycloak.realm}") String realm) {
         this.userRepository = userRepository;
@@ -34,38 +41,40 @@ public class UserService {
     }
 
     public UserResponseDto createUser(UserRequest userRequest) {
-        User user = new User();
-        user.setUsername(userRequest.getUsername());
-        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        user.setEmail(userRequest.getEmail());
-        user.setPhone(userRequest.getPhone());
-        user.setRoles(userRequest.getRole());
+        User user = User.builder()
+                .username(userRequest.getUsername())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
+                .email(userRequest.getEmail())
+                .phone(userRequest.getPhone())
+                .roles(userRequest.getRole())
+                .build();
         userRepository.save(user);
 
         RealmResource resource = keycloak.realm(realm);
         UserRepresentation userRepresentation = getUserRepresentation(userRequest);
-
+        String message = MessageFormat.format(ERROR_MESSAGE, userRepresentation.getUsername(), userRepresentation.getEmail());
         Response response = resource.users().create(userRepresentation);
         if (response.getStatus() == 201) {
             return toUserResponseDTO(user);
         } else {
-            throw new RuntimeException("Failed to create user!");
+            throw new RuntimeException(message);
         }
     }
 
     public UserResponseDto getUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
+        String message = MessageFormat.format(USER_NOT_FOUND_MESSAGE, EntityType.USER.name(), id);
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(message));
         return toUserResponseDTO(user);
     }
 
     public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAll().stream().map(this::toUserResponseDTO).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(UserMapper::toUserResponseDTO).collect(Collectors.toList());
     }
 
     public void deleteUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
+        String message = MessageFormat.format(USER_NOT_FOUND_MESSAGE, EntityType.USER.name(), id);
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(message));
         userRepository.delete(user);
-
         RealmResource realmResource = keycloak.realm(realm);
         realmResource.users().delete(user.getUsername());
     }
@@ -84,14 +93,5 @@ public class UserService {
         return userRepresentation;
     }
 
-    private UserResponseDto toUserResponseDTO(User user) {
-        UserResponseDto userResponseDto = new UserResponseDto();
-        userResponseDto.setId(user.getId());
-        userResponseDto.setUsername(user.getUsername());
-        userResponseDto.setEmail(user.getEmail());
-        userResponseDto.setPhone(user.getPhone());
-        userResponseDto.setRole(user.getRoles());
-        return userResponseDto;
 
-    }
 }
