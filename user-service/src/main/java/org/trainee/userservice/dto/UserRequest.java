@@ -17,10 +17,9 @@ import org.trainee.userservice.enums.Roles;
 @Builder
 public class UserRequest {
     @NotBlank
-    @Size(min = 10, max = 50)
+    @Size(max = 50)
     private String username;
     @NotBlank
-    @Size(min = 10, max = 10)
     private String password;
     @NotBlank
     @Size(min = 10, max = 50)

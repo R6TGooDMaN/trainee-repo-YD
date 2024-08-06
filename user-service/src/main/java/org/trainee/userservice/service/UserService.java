@@ -6,7 +6,6 @@ import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.trainee.productservice.enums.EntityType;
 import org.trainee.productservice.exception.EntityNotFoundException;
@@ -21,33 +20,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.trainee.userservice.mapper.UserMapper.buildUser;
 import static org.trainee.userservice.mapper.UserMapper.toUserResponseDTO;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final Keycloak keycloak;
     private final String realm;
     private final String ERROR_MESSAGE = "Failed to create user with name:{0} and email:{1}";
     private static final String USER_NOT_FOUND_MESSAGE = "Entity with name: {0} with ID: {1} not found";
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, Keycloak keycloak, @Value("${keycloak.realm}") String realm) {
+    public UserService(UserRepository userRepository, Keycloak keycloak, @Value("${keycloak.realm}") String realm) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.keycloak = keycloak;
         this.realm = realm;
     }
 
     public UserResponseDto createUser(UserRequest userRequest) {
-        User user = User.builder()
-                .username(userRequest.getUsername())
-                .password(passwordEncoder.encode(userRequest.getPassword()))
-                .email(userRequest.getEmail())
-                .phone(userRequest.getPhone())
-                .roles(userRequest.getRole())
-                .build();
+        User user = buildUser(userRequest);
         userRepository.save(user);
 
         RealmResource resource = keycloak.realm(realm);
