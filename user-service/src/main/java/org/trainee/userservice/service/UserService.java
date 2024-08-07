@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.trainee.userservice.mapper.UserMapper.buildUser;
+import static org.trainee.userservice.mapper.UserMapper.getUserRepresentation;
 import static org.trainee.userservice.mapper.UserMapper.toUserResponseDTO;
 
 @Service
@@ -69,20 +70,6 @@ public class UserService {
         userRepository.delete(user);
         RealmResource realmResource = keycloak.realm(realm);
         realmResource.users().delete(user.getUsername());
-    }
-
-    private static UserRepresentation getUserRepresentation(UserRequest userRequest) {
-        UserRepresentation userRepresentation = new UserRepresentation();
-        userRepresentation.setUsername(userRequest.getUsername());
-        userRepresentation.setEmail(userRequest.getEmail());
-        userRepresentation.setEnabled(true);
-
-        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
-        credentialRepresentation.setTemporary(false);
-        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
-        credentialRepresentation.setValue(userRequest.getPassword());
-        userRepresentation.setCredentials(Collections.singletonList(credentialRepresentation));
-        return userRepresentation;
     }
 
 

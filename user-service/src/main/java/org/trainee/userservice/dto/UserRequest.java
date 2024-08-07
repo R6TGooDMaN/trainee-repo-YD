@@ -2,6 +2,7 @@ package org.trainee.userservice.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,9 +24,11 @@ public class UserRequest {
     private String password;
     @NotBlank
     @Size(min = 10, max = 50)
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[A-Za-z]{2,}$")
     private String email;
     @NotBlank
     @Size(min = 13, max = 13)
+    @Pattern(regexp = "^\\+\\d{12}$")
     private String phone;
     @NotNull
     private Roles role;
