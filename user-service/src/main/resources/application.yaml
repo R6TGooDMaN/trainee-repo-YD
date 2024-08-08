@@ -1,0 +1,56 @@
+spring:
+  flyway:
+    user: postgres
+    password: 12345679
+    schemas: product-schemas
+    url: jdbc:postgresql://localhost:5432/microservice-shop-database
+    enabled: true
+    locations: filesystem:D:/repos/trainee-repo-YD/migration-service/src/main/resources/migration
+    default-schema: product-schemas
+    baseline-on-migrate: true
+  cloud:
+    config:
+      import-check:
+        enabled: false
+      fail-fast: true
+  jpa:
+    properties:
+      hibernate:
+        default_schema: product-schemas
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/microservice-shop-database
+    username: postgres
+    password: 12345679
+    driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8888/realms/services-dev-realm
+      client:
+        registration:
+          keycloak:
+            client-id:
+              user-service
+            authorization-grant-type:
+              authorization_code
+            scope:
+              openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8888/realms/services-dev-realm
+            user-name-attribute: preferred_username
+server:
+  port: 8082
+
+keycloak:
+  auth-server-url: http://localhost:8888/auth
+  realm: services-dev-realm
+  resource: user-service
+  credentials:
+    secret: s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5
+keycloak-admin:
+  username: admin
+  password: admin

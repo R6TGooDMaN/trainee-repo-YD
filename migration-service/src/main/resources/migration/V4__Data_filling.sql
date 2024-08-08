@@ -3,10 +3,10 @@ VALUES ('Phone','Good phone', 2000),
        ('Display','Good display', 1500),
        ('Web-camera','Good camera', 3000);
 
-INSERT INTO users(username,email,password,phone)
-VALUES ('Dima','super.email322@java.com','Goodparol123','+375447654321'),
-       ('Sasha','maxmail123@google.com','Mediumparol123','+375441234567'),
-       ('Anton','asdedx542@yandex.ru','+Hardparol123','+375291234567');
+INSERT INTO users(username,email,password,phone,roles)
+VALUES ('Dima','super.email322@java.com','Goodparol123','+375447654321','ADMIN'),
+       ('Sasha','maxmail123@google.com','Mediumparol123','+375441234567','USER'),
+       ('Anton','asdedx542@yandex.ru','+Hardparol123','+375291234567','USER');
 
 INSERT INTO orders(user_id,order_number,order_date)
 VALUES (126,41341,'1999-01-08'),
