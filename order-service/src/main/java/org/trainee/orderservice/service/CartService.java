@@ -17,8 +17,6 @@ public class CartService {
         this.cacheManager = cacheManager;
     }
 
-
-    //@CachePut(value = "cart", key = "#userId")
     public void addToCart(Long userId, CartDto cart) {
         Cache cache = cacheManager.getCache("cart");
         if (cache != null) {
