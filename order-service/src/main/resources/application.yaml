@@ -3,6 +3,7 @@ spring:
     redis:
       port: 6379
       host: localhost
+      database: 0
   cache:
     type: redis
   jpa:

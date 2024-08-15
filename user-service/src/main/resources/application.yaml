@@ -51,6 +51,7 @@ keycloak:
   resource: user-service
   credentials:
     secret: s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5
-keycloak-admin:
-  username: admin
-  password: admin
+  admin-username: admin
+  admin-password: admin
+
+

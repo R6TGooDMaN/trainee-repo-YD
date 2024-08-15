@@ -5,6 +5,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.trainee.productservice.enums.EntityType;
 import org.trainee.productservice.exception.EntityNotFoundException;
@@ -16,6 +17,7 @@ import org.trainee.userservice.repository.UserRepository;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.trainee.userservice.mapper.UserMapper.getUserRepresentation;
@@ -24,13 +26,15 @@ import static org.trainee.userservice.mapper.UserMapper.getUserRepresentation;
 @Service
 public class UserService {
 
+    private final JdbcTemplate jdbcTemplate;
     private final UserRepository userRepository;
     private final Keycloak keycloak;
     private final String realm;
     private final String ERROR_MESSAGE = "Failed to create user with name:{0} and email:{1}";
     private static final String USER_NOT_FOUND_MESSAGE = "Entity with name: {0} with ID: {1} not found";
 
-    public UserService(UserRepository userRepository, Keycloak keycloak, @Value("${keycloak.realm}") String realm) {
+    public UserService(JdbcTemplate jdbcTemplate, UserRepository userRepository, Keycloak keycloak, @Value("${keycloak.realm}") String realm) {
+        this.jdbcTemplate = jdbcTemplate;
         this.userRepository = userRepository;
         this.keycloak = keycloak;
         this.realm = realm;
@@ -49,6 +53,11 @@ public class UserService {
         } else {
             throw new RuntimeException(message);
         }
+    }
+
+    public List<Map<String,Object>> getUsers() {
+        String sqlQuery = "SELECT * FROM users";
+        return jdbcTemplate.queryForList(sqlQuery);
     }
 
     public UserResponseDto getUserById(Long id) {
