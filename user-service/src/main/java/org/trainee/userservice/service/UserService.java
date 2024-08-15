@@ -3,7 +3,6 @@ package org.trainee.userservice.service;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,13 +15,11 @@ import org.trainee.userservice.model.User;
 import org.trainee.userservice.repository.UserRepository;
 
 import java.text.MessageFormat;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.trainee.userservice.mapper.UserMapper.buildUser;
 import static org.trainee.userservice.mapper.UserMapper.getUserRepresentation;
-import static org.trainee.userservice.mapper.UserMapper.toUserResponseDTO;
+
 
 @Service
 public class UserService {
@@ -40,7 +37,7 @@ public class UserService {
     }
 
     public UserResponseDto createUser(UserRequest userRequest) {
-        User user = buildUser(userRequest);
+        User user = UserMapper.buildUser(userRequest);
         userRepository.save(user);
 
         RealmResource resource = keycloak.realm(realm);
@@ -48,7 +45,7 @@ public class UserService {
         String message = MessageFormat.format(ERROR_MESSAGE, userRepresentation.getUsername(), userRepresentation.getEmail());
         Response response = resource.users().create(userRepresentation);
         if (response.getStatus() == 201) {
-            return toUserResponseDTO(user);
+            return UserMapper.toUserResponseDTO(user);
         } else {
             throw new RuntimeException(message);
         }
@@ -57,7 +54,7 @@ public class UserService {
     public UserResponseDto getUserById(Long id) {
         String message = MessageFormat.format(USER_NOT_FOUND_MESSAGE, EntityType.USER.name(), id);
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(message));
-        return toUserResponseDTO(user);
+        return UserMapper.toUserResponseDTO(user);
     }
 
     public List<UserResponseDto> getAllUsers() {

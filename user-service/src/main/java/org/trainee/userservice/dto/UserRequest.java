@@ -28,7 +28,7 @@ public class UserRequest {
     private String email;
     @NotBlank
     @Size(min = 13, max = 13)
-    @Pattern(regexp = "^\\+\\d{12}$")
+    @Pattern(regexp = "^\\+\\d{13}$")
     private String phone;
     @NotNull
     private Roles role;

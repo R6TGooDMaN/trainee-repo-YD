@@ -5,6 +5,9 @@ import org.springframework.stereotype.Repository;
 import org.trainee.stockservice.key.StockProductKey;
 import org.trainee.stockservice.model.StockProduct;
 
+import java.util.Optional;
+
 @Repository
 public interface StockProductRepository extends JpaRepository<StockProduct, StockProductKey> {
+    Optional<StockProduct> findByProductId(Long productId);
 }
