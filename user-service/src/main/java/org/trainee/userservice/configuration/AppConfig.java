@@ -30,9 +30,6 @@ public class AppConfig {
     @Value("${keycloak.admin-password}")
     private String adminPassword;
 
-    @Value("${keycloak.admin-client-id}")
-    private String adminClientId;
-
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

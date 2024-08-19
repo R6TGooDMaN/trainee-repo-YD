@@ -8,6 +8,7 @@ import org.trainee.orderservice.dto.StockProductDto;
 @Component
 public class UserClient {
     private final RestTemplate restTemplate;
+    private final String userUrl = "api/v1/user/";
     private final String serviceUrl;
 
     public UserClient(RestTemplate restTemplate, @Value("${user-service.url}") String serviceUrl) {
@@ -15,11 +16,12 @@ public class UserClient {
         this.serviceUrl = serviceUrl;
     }
 
-    public StockProductDto getProduct(Long id) {
-        return restTemplate.getForObject(serviceUrl + "api/v1/user/" + id, StockProductDto.class);
+    public StockProductDto getUser(Long id) {
+        return restTemplate.getForObject(serviceUrl + userUrl + id, StockProductDto.class);
     }
 
     public void UpdateProductQuantity(Integer productId, Integer quantity) {
-        restTemplate.put(serviceUrl + "api/v1/user/" + productId + "/" + quantity, quantity);
+        restTemplate.put(serviceUrl + userUrl + productId + "/" + quantity, quantity);
     }
+
 }

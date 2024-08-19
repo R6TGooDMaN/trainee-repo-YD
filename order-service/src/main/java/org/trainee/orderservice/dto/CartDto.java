@@ -2,6 +2,7 @@ package org.trainee.orderservice.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @Data

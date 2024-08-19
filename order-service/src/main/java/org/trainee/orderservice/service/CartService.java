@@ -5,20 +5,27 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.trainee.orderservice.dto.CartDto;
 
 @Service
 public class CartService {
     private static final String CART_STRING_PREFIX = "cart:";
-    private CacheManager cacheManager;
+    private final CacheManager cacheManager;
+    private final RestTemplate restTemplate;
+    private final String cacheName = "cart";
+    private final Cache cache;
 
     @Autowired
-    public CartService(CacheManager cacheManager) {
+    public CartService(CacheManager cacheManager, RestTemplate restTemplate) {
         this.cacheManager = cacheManager;
+        this.restTemplate = restTemplate;
+        this.cache = cacheManager.getCache(cacheName);
     }
 
+
+
     public void addToCart(Long userId, CartDto cart) {
-        Cache cache = cacheManager.getCache("cart");
         if (cache != null) {
             cache.put(CART_STRING_PREFIX + userId, cart);
         }
@@ -26,7 +33,6 @@ public class CartService {
 
     @Cacheable(value = "cart", key = "#userId")
     public CartDto getCart(Long userId) {
-        Cache cache = cacheManager.getCache("cart");
         if (cache != null) {
             return (CartDto) cache.get(CART_STRING_PREFIX + userId).get();
         }
@@ -34,7 +40,6 @@ public class CartService {
     }
 
     public void clearCart(Long userId) {
-        Cache cache = cacheManager.getCache("cart");
         if (cache != null) {
             cache.evict(CART_STRING_PREFIX + userId);
         }

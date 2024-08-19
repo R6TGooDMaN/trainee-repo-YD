@@ -4,8 +4,22 @@ spring:
       port: 6379
       host: localhost
       database: 0
+      connect-timeout: 60s
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 60s
   cache:
     type: redis
+    redis:
+      time-to-live: 60s
+      cache-null-values: true
+      key-prefix: ''
+      use-key-prefix: false
+      serializer:
+        value:
   jpa:
     properties:
       hibernate:

@@ -86,8 +86,9 @@ public class StockService {
 
     @Transactional
     public void updateProductQuantity(Long productId, int quantityChange) {
+        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
         StockProduct stockProduct = stockProductRepository.findByProductId(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found in stock"));
+                .orElseThrow(() -> new EntityNotFoundException(productMessage));
 
         int newQuantity = stockProduct.getQuantity() + quantityChange;
         if (newQuantity < 0) {
@@ -97,19 +98,15 @@ public class StockService {
         stockProductRepository.save(stockProduct);
     }
     public StockProductResponse getProduct(Long productId) {
-        // Получаем информацию о продукте из ProductService
+        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
         ResponseEntity<Product> response = restTemplate.getForEntity(productServiceUrl + productId, Product.class);
         Product product = response.getBody();
 
         if (product == null) {
-            throw new EntityNotFoundException("Product not found");
+            throw new EntityNotFoundException(productMessage);
         }
-
-        // Получаем количество продукта на складе
         StockProduct stockProduct = stockProductRepository.findByProductId(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found in stock"));
-
-        // Преобразуем в DTO
+                .orElseThrow(() -> new EntityNotFoundException(productMessage));
         StockProductResponse dto = new StockProductResponse();
         dto.setProductId(product.getId());
         dto.setQuantity(stockProduct.getQuantity());
