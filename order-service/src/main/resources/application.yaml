@@ -18,8 +18,6 @@ spring:
       cache-null-values: true
       key-prefix: ''
       use-key-prefix: false
-      serializer:
-        value:
   jpa:
     properties:
       hibernate:
