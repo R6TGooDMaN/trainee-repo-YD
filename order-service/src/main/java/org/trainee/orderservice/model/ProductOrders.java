@@ -11,7 +11,7 @@ import lombok.Setter;
 import org.trainee.orderservice.key.ProductOrderKey;
 
 @Entity
-@Table(name = "product_order")
+@Table(name = "product_orders")
 @Getter
 @Setter
 @IdClass(ProductOrderKey.class)
@@ -27,5 +27,4 @@ public class ProductOrders {
     @ManyToOne
     @JoinColumn(name = "order_id", insertable = false, updatable = false)
     private Order order;
-
 }

@@ -39,7 +39,6 @@ public class Order {
     private Date orderDate;
     @Enumerated(EnumType.STRING)
     private OrderStatuses orderStatus;
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<ProductOrders> products;
 }

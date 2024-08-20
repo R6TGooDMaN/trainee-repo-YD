@@ -9,6 +9,7 @@ import org.trainee.orderservice.dto.StockProductDto;
 public class StockClient {
     private final RestTemplate restTemplate;
     private final String stockUrl = "api/v1/stock/";
+    private final String slash = "/";
     private final String serviceUrl;
 
     public StockClient(RestTemplate restTemplate, @Value("${stock-service.url}") String serviceUrl) {
@@ -21,7 +22,7 @@ public class StockClient {
     }
 
     public void UpdateProductQuantity(Integer productId, Integer quantity) {
-        restTemplate.put(serviceUrl + stockUrl + productId + "/" + quantity, quantity);
+        restTemplate.put(serviceUrl + stockUrl + productId + slash + quantity, quantity);
     }
 
 }

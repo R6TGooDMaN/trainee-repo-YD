@@ -7,20 +7,22 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.trainee.orderservice.dto.CartDto;
+import org.trainee.orderservice.exception.NoCacheException;
 
 @Service
 public class CartService {
     private static final String CART_STRING_PREFIX = "cart:";
     private final CacheManager cacheManager;
     private final RestTemplate restTemplate;
-    private final String cacheName = "cart";
+    private final String NO_CACHE_MESSAGE = "There is no cache";
+    private final String CACHE_NAME = "cart";
     private final Cache cache;
 
     @Autowired
     public CartService(CacheManager cacheManager, RestTemplate restTemplate) {
         this.cacheManager = cacheManager;
         this.restTemplate = restTemplate;
-        this.cache = cacheManager.getCache(cacheName);
+        this.cache = cacheManager.getCache(CACHE_NAME);
     }
 
 
@@ -28,6 +30,8 @@ public class CartService {
     public void addToCart(Long userId, CartDto cart) {
         if (cache != null) {
             cache.put(CART_STRING_PREFIX + userId, cart);
+        } else {
+            throw new NoCacheException(NO_CACHE_MESSAGE);
         }
     }
 

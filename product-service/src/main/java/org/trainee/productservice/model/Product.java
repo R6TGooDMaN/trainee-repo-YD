@@ -1,5 +1,6 @@
 package org.trainee.productservice.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,7 +43,6 @@ public class Product {
     @Min(value = 1, message = "Price must be grated than zero")
     @Column(nullable = false)
     private Integer price;
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private Set<ProductOrders> productOrders;
-
 }
