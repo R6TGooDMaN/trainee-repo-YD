@@ -1,15 +1,25 @@
 package org.trainee.orderservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.trainee.orderservice.clients.UserClient;
 import org.trainee.orderservice.dto.CartDto;
 import org.trainee.orderservice.exception.NoCacheException;
-import org.trainee.orderservice.exception.NoUserException;
 
 import java.text.MessageFormat;
 
@@ -20,8 +30,9 @@ public class CartService {
     private final CacheManager cacheManager;
     private final RestTemplate restTemplate;
     private final String NO_CACHE_MESSAGE = "No cart exists of user with id: {0}";
-    private final String NO_USER_MESSAGE = "There is no user with id: {0}";
     private final String CACHE_NAME = "cart";
+    private final String USERNAME = "user1";
+    private final String PASSWORD = "12345679";
     private final Cache cache;
 
     @Autowired
@@ -32,14 +43,37 @@ public class CartService {
         this.cache = cacheManager.getCache(CACHE_NAME);
     }
 
-
+    private String getCurrentUserToken(String username, String password) {
+        String url = "http://localhost:8888/realms/services-dev-realm/protocol/openid-connect/token";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("client_id", "user-service");
+        body.add("client_secret", "s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5");
+        body.add("grant_type", "password");
+        body.add("username", username);
+        body.add("password", password);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            String responseBody = response.getBody();
+            if (responseBody != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    JsonNode jsonNode = mapper.readTree(responseBody);
+                    return jsonNode.get("access_token").asText();
+                } catch (JsonProcessingException e) {
+                    System.out.println("Bad token");
+                    ;
+                }
+            }
+        }
+        return "Token is empty!";
+    }
 
     public void addToCart(Long userId, CartDto cart) {
-        String userMessage = MessageFormat.format(NO_USER_MESSAGE, userId);
+        userClient.getUser(userId,getCurrentUserToken(USERNAME, PASSWORD));
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
-        if (userClient.getUser(userId) == null) {
-           throw new NoUserException(userMessage);
-        } else
         if (cache != null) {
             cache.put(CART_STRING_PREFIX + userId, cart);
         } else {
@@ -49,11 +83,8 @@ public class CartService {
 
     @Cacheable(value = "cart", key = "#userId")
     public CartDto getCart(Long userId) {
-        String userMessage = MessageFormat.format(NO_USER_MESSAGE, userId);
+        userClient.getUser(userId,getCurrentUserToken(USERNAME, PASSWORD));
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
-        if (userClient.getUser(userId) == null) {
-            throw new NoUserException(userMessage);
-        }
         if (cache != null) {
             return (CartDto) cache.get(CART_STRING_PREFIX + userId).get();
         } else {
@@ -62,12 +93,9 @@ public class CartService {
     }
 
     public void clearCart(Long userId) {
-        String userMessage = MessageFormat.format(NO_USER_MESSAGE, userId);
+        userClient.getUser(userId,getCurrentUserToken(USERNAME, PASSWORD));
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         CartDto cart = getCart(userId);
-        if (userClient.getUser(userId) == null) {
-            throw new NoUserException(userMessage);
-        }
         if (cache != null && cart != null) {
             cache.evict(CART_STRING_PREFIX + userId);
         } else {
@@ -76,12 +104,9 @@ public class CartService {
     }
 
     public void removeFromCart(Long userId, Long productId) {
-        String userMessage = MessageFormat.format(NO_USER_MESSAGE, userId);
+        userClient.getUser(userId,getCurrentUserToken(USERNAME, PASSWORD));
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         CartDto cart = getCart(userId);
-        if (userClient.getUser(userId) == null) {
-            throw new NoUserException(userMessage);
-        }
         if (cart != null) {
             cart.getCartItems().removeIf(item -> item.getProductId().equals(productId));
             addToCart(userId, cart);
@@ -89,5 +114,4 @@ public class CartService {
             throw new NoCacheException(cacheMessage);
         }
     }
-
 }

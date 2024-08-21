@@ -17,7 +17,6 @@ import org.trainee.userservice.repository.UserRepository;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.trainee.userservice.mapper.UserMapper.getUserRepresentation;
@@ -43,7 +42,6 @@ public class UserService {
     public UserResponseDto createUser(UserRequest userRequest) {
         User user = UserMapper.buildUser(userRequest);
         userRepository.save(user);
-
         RealmResource resource = keycloak.realm(realm);
         UserRepresentation userRepresentation = getUserRepresentation(userRequest);
         String message = MessageFormat.format(ERROR_MESSAGE, userRepresentation.getUsername(), userRepresentation.getEmail());
@@ -53,11 +51,6 @@ public class UserService {
         } else {
             throw new RuntimeException(message);
         }
-    }
-
-    public List<Map<String,Object>> getUsers() {
-        String sqlQuery = "SELECT * FROM users";
-        return jdbcTemplate.queryForList(sqlQuery);
     }
 
     public UserResponseDto getUserById(Long id) {
