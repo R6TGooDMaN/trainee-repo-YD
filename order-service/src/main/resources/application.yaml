@@ -50,5 +50,7 @@ product-service.url: http://localhost:8080
 stock-service.url: http://localhost:8081
 user-service.url: http://localhost:8082
 keycloak:
+  port: http://localhost:8888
+  endpoint: /realms/services-dev-realm/protocol/openid-connect/token
   client:
     secret: s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5

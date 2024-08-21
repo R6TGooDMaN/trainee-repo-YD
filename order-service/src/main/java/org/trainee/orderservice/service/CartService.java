@@ -32,8 +32,13 @@ public class CartService {
     private final RestTemplate restTemplate;
     private final String NO_CACHE_MESSAGE = "No cart exists of user with id: {0}";
     private final String CACHE_NAME = "cart";
-    private final String KEYCLOAK_PORT = "http://localhost:8888";
-    private final String KEYClOAK_TOKEN_ENDPOINT = "/realms/services-dev-realm/protocol/openid-connect/token";
+
+    @Value("${keycloak.port}")
+    private String KEYCLOAK_PORT;
+
+    @Value("${keycloak.endpoint}")
+    private  String KEYClOAK_TOKEN_ENDPOINT;
+
     @Value("${keycloak.client.secret}")
     private String clientSecret;
     private final Cache cache;
