@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,8 +32,10 @@ public class CartService {
     private final RestTemplate restTemplate;
     private final String NO_CACHE_MESSAGE = "No cart exists of user with id: {0}";
     private final String CACHE_NAME = "cart";
-    private final String USERNAME = "user1";
-    private final String PASSWORD = "12345679";
+    private final String KEYCLOAK_PORT = "http://localhost:8888";
+    private final String KEYClOAK_TOKEN_ENDPOINT = "/realms/services-dev-realm/protocol/openid-connect/token";
+    @Value("${keycloak.client.secret}")
+    private String clientSecret;
     private final Cache cache;
 
     @Autowired
@@ -43,16 +46,14 @@ public class CartService {
         this.cache = cacheManager.getCache(CACHE_NAME);
     }
 
-    private String getCurrentUserToken(String username, String password) {
-        String url = "http://localhost:8888/realms/services-dev-realm/protocol/openid-connect/token";
+    private String getCurrentUserToken() {
+        String url = KEYCLOAK_PORT + KEYClOAK_TOKEN_ENDPOINT;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("client_id", "user-service");
-        body.add("client_secret", "s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5");
-        body.add("grant_type", "password");
-        body.add("username", username);
-        body.add("password", password);
+        body.add("client_secret", clientSecret);
+        body.add("grant_type", "client_credentials");
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -72,7 +73,7 @@ public class CartService {
     }
 
     public void addToCart(Long userId, CartDto cart) {
-        userClient.getUser(userId,getCurrentUserToken(USERNAME, PASSWORD));
+        userClient.getUser(userId,getCurrentUserToken());
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         if (cache != null) {
             cache.put(CART_STRING_PREFIX + userId, cart);
@@ -83,7 +84,7 @@ public class CartService {
 
     @Cacheable(value = "cart", key = "#userId")
     public CartDto getCart(Long userId) {
-        userClient.getUser(userId,getCurrentUserToken(USERNAME, PASSWORD));
+        userClient.getUser(userId,getCurrentUserToken());
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         if (cache != null) {
             return (CartDto) cache.get(CART_STRING_PREFIX + userId).get();
@@ -93,7 +94,7 @@ public class CartService {
     }
 
     public void clearCart(Long userId) {
-        userClient.getUser(userId,getCurrentUserToken(USERNAME, PASSWORD));
+        userClient.getUser(userId,getCurrentUserToken());
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         CartDto cart = getCart(userId);
         if (cache != null && cart != null) {
@@ -104,7 +105,7 @@ public class CartService {
     }
 
     public void removeFromCart(Long userId, Long productId) {
-        userClient.getUser(userId,getCurrentUserToken(USERNAME, PASSWORD));
+        userClient.getUser(userId,getCurrentUserToken());
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         CartDto cart = getCart(userId);
         if (cart != null) {

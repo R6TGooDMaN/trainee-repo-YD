@@ -7,7 +7,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.trainee.orderservice.dto.UserDto;
 import org.trainee.orderservice.exception.NoUserException;
@@ -31,7 +30,7 @@ public class UserClient {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + token);
-            HttpEntity<String> entity = new HttpEntity<String>(headers);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
             ResponseEntity<UserDto> response = restTemplate.exchange(serviceUrl + userUrl + id, HttpMethod.GET, entity, UserDto.class);
             return response.getBody();
         } catch (HttpServerErrorException e) {

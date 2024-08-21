@@ -49,3 +49,6 @@ server:
 product-service.url: http://localhost:8080
 stock-service.url: http://localhost:8081
 user-service.url: http://localhost:8082
+keycloak:
+  client:
+    secret: s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5
