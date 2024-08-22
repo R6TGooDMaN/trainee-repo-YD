@@ -15,5 +15,14 @@ spring:
     url: jdbc:postgresql://localhost:5432/microservice-shop-database
     username: postgres
     password: 12345679
+  flyway:
+    user: postgres
+    password: 12345679
+    schemas: product-schemas
+    url: jdbc:postgresql://localhost:5432/microservice-shop-database
+    enabled: true
+    locations: filesystem:D:/repos/trainee-repo-YD/migration-service/src/main/resources/migration
+    default-schema: product-schemas
+    baseline-on-migrate: true
 server:
   port: 8081

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,7 @@ import org.trainee.stockservice.service.StockService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/stock")
+@RequestMapping("/api/v1/stock")
 public class StockController {
     private final StockService stockService;
 
@@ -51,6 +52,12 @@ public class StockController {
     public ResponseEntity<Boolean> isInStock(@PathVariable Long stockId, @PathVariable Long productId) {
         boolean isInStock = stockService.isInStock(stockId, productId);
         return ResponseEntity.ok(isInStock);
+    }
+
+    @PutMapping("/{productId}/{quantity}")
+    public ResponseEntity<StockResponse> updateQuantity(@PathVariable Long productId, @PathVariable Integer quantity) {
+        stockService.updateProductQuantity(productId, quantity);
+        return ResponseEntity.ok().build();
     }
 }
 

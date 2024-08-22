@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.trainee.productservice.dto.ProductRequest;
 import org.trainee.productservice.dto.ProductResponse;
+import org.trainee.productservice.enums.EntityType;
 import org.trainee.productservice.mapper.ProductMapper;
 import org.trainee.productservice.repository.ProductRepository;
 import org.trainee.productservice.service.ProductService;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.List;
 
 @RestController
@@ -29,6 +31,18 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @GetMapping("/etype_product")
+    public String getProductEntityType(){
+        return EntityType.PRODUCT.name();
+    }
+    @GetMapping("/etype_order")
+    public String getOrderEntityType(){
+        return EntityType.ORDER.name();
+    }
+    @GetMapping("/etype_user")
+    public String getUserEntityType(){
+        return EntityType.USER.name();
+    }
 
 
     @PostMapping("/save")

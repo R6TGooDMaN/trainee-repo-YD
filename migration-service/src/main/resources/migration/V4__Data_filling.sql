@@ -8,13 +8,13 @@ VALUES ('Dima','super.email322@java.com','Goodparol123','+375447654321','ADMIN')
        ('Sasha','maxmail123@google.com','Mediumparol123','+375441234567','USER'),
        ('Anton','asdedx542@yandex.ru','+Hardparol123','+375291234567','USER');
 
-INSERT INTO orders(user_id,order_number,order_date)
-VALUES (126,41341,'1999-01-08'),
-       (151,52412,'1999-01-08'),
-       (126,12432,'1999-01-08'),
-       (151,64351,'1999-01-08'),
-       (126,1421,'1999-01-08'),
-       (151,9854,'1999-01-08');
+INSERT INTO orders(user_id,order_number,order_date,order_status)
+VALUES (126,41341,'1999-01-08','CLOSED'),
+       (151,52412,'1999-01-08','CANCELED'),
+       (126,12432,'1999-01-08','OPENED'),
+       (151,64351,'1999-01-08','CANCELED'),
+       (126,1421,'1999-01-08','CLOSED'),
+       (151,9854,'1999-01-08','OPENED');
 
 INSERT INTO product_order(product_id, order_id, quantity)
 VALUES (101,201,3),

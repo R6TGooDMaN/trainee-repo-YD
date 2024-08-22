@@ -1,4 +1,4 @@
-package org.trainee.stockservice.key;
+package org.trainee.orderservice.key;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -12,10 +12,10 @@ import java.io.Serializable;
 @Embeddable
 @Setter
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode
-public class StockProductKey implements Serializable {
-    private Long stockId;
+public class ProductOrderKey implements Serializable {
     private Long productId;
+    private Long order_Id;
 }
