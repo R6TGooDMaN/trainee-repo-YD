@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.trainee.stockservice.dto.StockProductRequest;
+import org.trainee.stockservice.dto.StockProductResponse;
+import org.trainee.stockservice.dto.StockRequest;
 import org.trainee.stockservice.dto.StockResponse;
 import org.trainee.stockservice.model.Stock;
 import org.trainee.stockservice.service.StockService;
@@ -36,9 +38,21 @@ public class StockController {
         return ResponseEntity.ok(stock);
     }
 
-    @PostMapping("/{stockId}/save/{productId}")
-    public ResponseEntity<StockResponse> addToStock(@PathVariable Long stockId, @RequestBody StockProductRequest stockProductRequest) {
-        StockResponse stock = stockService.addProduct(stockId, stockProductRequest);
+    @PostMapping("/create")
+    public ResponseEntity<StockResponse> createStock(@RequestBody StockRequest stockRequest) {
+        StockResponse stock = stockService.createStock(stockRequest);
+        return ResponseEntity.ok(stock);
+    }
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity<List<StockProductResponse>> getStockProductById(@PathVariable Long id) {
+        List<StockProductResponse> stock = stockService.getProductsInStock(id);
+        return ResponseEntity.ok(stock);
+    }
+
+    @PostMapping("/{stockId}/save/")
+    public ResponseEntity<StockProductResponse> addToStock(@PathVariable Long stockId, @RequestBody StockProductRequest stockProductRequest) {
+        StockProductResponse stock = stockService.addProduct(stockId, stockProductRequest);
         return ResponseEntity.ok(stock);
     }
 
@@ -54,9 +68,9 @@ public class StockController {
         return ResponseEntity.ok(isInStock);
     }
 
-    @PutMapping("/{productId}/{quantity}")
-    public ResponseEntity<StockResponse> updateQuantity(@PathVariable Long productId, @PathVariable Integer quantity) {
-        stockService.updateProductQuantity(productId, quantity);
+    @PutMapping("/{productId}/{stockId}/{quantity}")
+    public ResponseEntity<StockResponse> updateQuantity(@PathVariable Long productId, @PathVariable Long stockId, @PathVariable Integer quantity) {
+        stockService.increaseProductQuantity(productId, stockId, quantity);
         return ResponseEntity.ok().build();
     }
 }

@@ -8,8 +8,10 @@ import org.springframework.web.client.RestTemplate;
 import org.trainee.productservice.enums.EntityType;
 import org.trainee.productservice.exception.EntityNotFoundException;
 import org.trainee.productservice.model.Product;
+import org.trainee.stockservice.dto.ProductDto;
 import org.trainee.stockservice.dto.StockProductRequest;
 import org.trainee.stockservice.dto.StockProductResponse;
+import org.trainee.stockservice.dto.StockRequest;
 import org.trainee.stockservice.dto.StockResponse;
 import org.trainee.stockservice.key.StockProductKey;
 import org.trainee.stockservice.mapper.StockMapper;
@@ -19,6 +21,7 @@ import org.trainee.stockservice.repository.StockProductRepository;
 import org.trainee.stockservice.repository.StockRepository;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -46,24 +49,44 @@ public class StockService {
         return StockMapper.stockToResponse(stock);
     }
 
+    public StockResponse createStock(StockRequest stockRequest) {
+        return StockResponse.builder()
+                .name(stockRequest.getName()).build();
+    }
+
     @Transactional
-    public StockResponse addProduct(Long stockId, StockProductRequest stockProductRequest) {
+    public StockProductResponse addProduct(Long stockId, StockProductRequest stockProductRequest) {
         String stockMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.STOCK.name(), stockId);
         String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), stockProductRequest.getProductId());
-
-        Stock stock = stockRepository.findById(stockId)
+        stockRepository.findById(stockId)
                 .orElseThrow(() -> new EntityNotFoundException(stockMessage));
-        Product product = restTemplate.getForObject(productServiceUrl + stockProductRequest.getProductId(), Product.class);
+        ProductDto product = restTemplate.getForObject(productServiceUrl + stockProductRequest.getProductId(), ProductDto.class);
         if (product == null) {
             throw new EntityNotFoundException(productMessage);
         }
-        StockProduct stockProduct = StockMapper.requestToStockProduct(stockProductRequest);
-        stockProduct.setStock(stock);
-        stockProduct.setProduct(product);
+        StockProduct stockProductCheck = stockProductRepository.findByProductIdAndStockId(product.getId(), stockId).orElseThrow(() -> new EntityNotFoundException(productMessage));
+        StockProduct stockProduct;
+        if (stockProductCheck != null) {
+            stockProductCheck.setQuantity(stockProductCheck.getQuantity()+stockProductRequest.getQuantity());
+            updateStockProductQuantity(product.getId(), stockId, stockProductRequest);
+            return StockMapper.stockProductToResponse(stockProductCheck);
+        } else {
+            stockProduct = StockMapper.requestToStockProduct(stockProductRequest);
+            stockProduct.setStockId(stockId);
+            stockProduct.setProductId(product.getId());
+            stockProduct.setQuantity(stockProductRequest.getQuantity());
+            stockProductRepository.save(stockProduct);
+            return StockMapper.stockProductToResponse(stockProduct);
+        }
+    }
 
-        stock.getStockProducts().add(stockProduct);
-        stockProductRepository.save(stockProduct);
-        return StockMapper.stockToResponse(stock);
+    public List<StockProductResponse> getProductsInStock(Long stockId) {
+        List<StockProduct> list = stockProductRepository.findByStockId(stockId);
+        List<StockProductResponse> responses = new ArrayList<>();
+        for (StockProduct product : list) {
+            responses.add(StockMapper.stockProductToResponse(product));
+        }
+        return responses;
     }
 
     public void removeProduct(Long stockId, Long productId) {
@@ -84,10 +107,20 @@ public class StockService {
         return stockProductRepository.existsById(id);
     }
 
+    public StockProductResponse updateStockProductQuantity(Long stockId, Long productId, StockProductRequest stockProductRequest) {
+        return stockProductRepository.findByProductIdAndStockId(productId,stockId)
+                .map(existingStock -> {
+                    StockProduct updatedStock = StockMapper.updateStockProductFromRequest(existingStock, stockProductRequest);
+                    StockProduct savedStock = stockProductRepository.save(updatedStock);
+                    return StockMapper.stockProductToResponse(savedStock);
+                        }
+                ).orElseThrow(()-> new EntityNotFoundException(STOCK_ERROR_MESSAGE));
+    }
+
     @Transactional
-    public void updateProductQuantity(Long productId, int quantityChange) {
+    public StockProduct increaseProductQuantity(Long productId, Long stockId, int quantityChange) {
         String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
-        StockProduct stockProduct = stockProductRepository.findByProductId(productId)
+        StockProduct stockProduct = stockProductRepository.findByProductIdAndStockId(productId, stockId)
                 .orElseThrow(() -> new EntityNotFoundException(productMessage));
 
         int newQuantity = stockProduct.getQuantity() + quantityChange;
@@ -95,7 +128,7 @@ public class StockService {
             throw new IllegalStateException("Not enough stock available");
         }
         stockProduct.setQuantity(newQuantity);
-        stockProductRepository.save(stockProduct);
+        return stockProductRepository.save(stockProduct);
     }
     public StockProductResponse getProduct(Long productId) {
         String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);

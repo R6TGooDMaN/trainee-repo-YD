@@ -1,7 +1,6 @@
 package org.trainee.orderservice.mapper;
 
 import lombok.experimental.UtilityClass;
-import org.springframework.stereotype.Component;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
 import org.trainee.orderservice.model.Order;

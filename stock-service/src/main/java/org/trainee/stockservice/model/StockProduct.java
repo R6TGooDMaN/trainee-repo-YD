@@ -1,19 +1,17 @@
 package org.trainee.stockservice.model;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.trainee.productservice.model.Product;
-import org.trainee.stockservice.key.StockProductKey;
 
 @Entity
 @Table(name = "stock_product")
@@ -22,22 +20,13 @@ import org.trainee.stockservice.key.StockProductKey;
 @Getter
 @Setter
 @Builder
+@IdClass(StockProduct.class)
 public class StockProduct {
-
-    @EmbeddedId
-    private StockProductKey id;
-
-    @ManyToOne
-    @MapsId("stockId")
-    @JoinColumn(name = "stock_id")
-    private Stock stock;
-
-    @ManyToOne
-    @MapsId("productId")
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    @Column(length = 400)
+    @Id
+    private Long stockId;
+    @Id
+    private Long productId;
+    @Max(value = 400)
     private Integer quantity;
 
 }

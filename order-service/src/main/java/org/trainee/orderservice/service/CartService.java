@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,11 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.trainee.orderservice.clients.ProductClient;
 import org.trainee.orderservice.clients.UserClient;
 import org.trainee.orderservice.dto.CartDto;
+import org.trainee.orderservice.dto.CartItemsDto;
 import org.trainee.orderservice.exception.NoCacheException;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 @Service
 public class CartService {
@@ -32,23 +34,25 @@ public class CartService {
     private final RestTemplate restTemplate;
     private final String NO_CACHE_MESSAGE = "No cart exists of user with id: {0}";
     private final String CACHE_NAME = "cart";
+    private final ProductClient productClient;
 
     @Value("${keycloak.port}")
     private String KEYCLOAK_PORT;
 
     @Value("${keycloak.endpoint}")
-    private  String KEYClOAK_TOKEN_ENDPOINT;
+    private String KEYClOAK_TOKEN_ENDPOINT;
 
     @Value("${keycloak.client.secret}")
     private String clientSecret;
     private final Cache cache;
 
     @Autowired
-    public CartService(UserClient userClient, CacheManager cacheManager, RestTemplate restTemplate) {
+    public CartService(UserClient userClient, CacheManager cacheManager, RestTemplate restTemplate, ProductClient productClient) {
         this.userClient = userClient;
         this.cacheManager = cacheManager;
         this.restTemplate = restTemplate;
         this.cache = cacheManager.getCache(CACHE_NAME);
+        this.productClient = productClient;
     }
 
     private String getCurrentUserToken() {
@@ -78,18 +82,20 @@ public class CartService {
     }
 
     public void addToCart(Long userId, CartDto cart) {
-        userClient.getUser(userId,getCurrentUserToken());
-        String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
-        if (cache != null) {
+        for (CartItemsDto cartItem : cart.getCartItems()) {
+            productClient.getProductById(cartItem.getProductId());
+        }
+        userClient.getUser(userId, getCurrentUserToken());
+        String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, cart.getUserId());
+        if (cache != null && Objects.equals(cart.getUserId(), userId)) {
             cache.put(CART_STRING_PREFIX + userId, cart);
         } else {
             throw new NoCacheException(cacheMessage);
         }
     }
 
-    @Cacheable(value = "cart", key = "#userId")
     public CartDto getCart(Long userId) {
-        userClient.getUser(userId,getCurrentUserToken());
+        userClient.getUser(userId, getCurrentUserToken());
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         if (cache != null) {
             return (CartDto) cache.get(CART_STRING_PREFIX + userId).get();
@@ -99,7 +105,7 @@ public class CartService {
     }
 
     public void clearCart(Long userId) {
-        userClient.getUser(userId,getCurrentUserToken());
+        userClient.getUser(userId, getCurrentUserToken());
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         CartDto cart = getCart(userId);
         if (cache != null && cart != null) {
@@ -110,7 +116,7 @@ public class CartService {
     }
 
     public void removeFromCart(Long userId, Long productId) {
-        userClient.getUser(userId,getCurrentUserToken());
+        userClient.getUser(userId, getCurrentUserToken());
         String cacheMessage = MessageFormat.format(NO_CACHE_MESSAGE, userId);
         CartDto cart = getCart(userId);
         if (cart != null) {

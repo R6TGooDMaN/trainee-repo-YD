@@ -25,7 +25,7 @@ public class CartController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<CartDto> getCart(@PathVariable Long userId, Principal principal) {
+    public ResponseEntity<CartDto> getCart(@PathVariable Long userId) {
         return ResponseEntity.ok(cartService.getCart(userId));
     }
 
@@ -46,4 +46,6 @@ public class CartController {
         cartService.clearCart(userId);
         return ResponseEntity.ok().build();
     }
+
+
 }

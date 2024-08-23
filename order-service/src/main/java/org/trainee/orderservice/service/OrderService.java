@@ -1,5 +1,6 @@
 package org.trainee.orderservice.service;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.trainee.orderservice.clients.ProductClient;
@@ -7,27 +8,45 @@ import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
 import org.trainee.orderservice.enums.OrderStatuses;
 import org.trainee.orderservice.exception.OrderNotFoundMessage;
+import org.trainee.orderservice.mapper.CartMapper;
 import org.trainee.orderservice.mapper.OrderMapper;
+import org.trainee.orderservice.model.Cart;
+import org.trainee.orderservice.model.CartItems;
 import org.trainee.orderservice.model.Order;
+import org.trainee.orderservice.model.ProductOrders;
 import org.trainee.orderservice.repository.OrderRepository;
+import org.trainee.orderservice.repository.ProductOrderRepository;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class OrderService {
     public final OrderRepository orderRepository;
     public final String ORDER_NOT_FOUND_MESSAGE = "Entity with type: {0} with ID: {1} not found";
+    public final CartService cartService;
     public final ProductClient productClient;
+    public final ProductOrderRepository productOrderRepository;
 
-    public OrderService(OrderRepository orderRepository, RestTemplate restTemplate, ProductClient productClient) {
+    public OrderService(OrderRepository orderRepository, CartService cartService, ProductClient productClient, ProductOrderRepository productOrderRepository) {
         this.orderRepository = orderRepository;
+        this.cartService = cartService;
         this.productClient = productClient;
+        this.productOrderRepository = productOrderRepository;
     }
 
     public OrderResponse createOrder(OrderRequest orderRequest) {
+        Cart cart = CartMapper.mapToCart(cartService.getCart(orderRequest.getUserId()));
+        Set<CartItems> itemsList= cart.getItems();
         Order order = OrderMapper.mapToOrder(orderRequest);
-        order.setOrderStatus(OrderStatuses.OPENED);
+        for (CartItems cartItems : itemsList) {
+            ProductOrders productOrders = new ProductOrders();
+            productOrders.setOrderId(order.getId());
+            productOrders.setProductId(cartItems.getProductId());
+            productOrders.setQuantity(cartItems.getQuantity());
+            productOrderRepository.save(productOrders);
+        }
         Order savedOrder = orderRepository.save(order);
         return OrderMapper.mapToOrderResponse(savedOrder);
     }
