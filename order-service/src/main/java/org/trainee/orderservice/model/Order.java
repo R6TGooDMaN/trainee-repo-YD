@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.trainee.orderservice.enums.OrderStatuses;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,7 +33,8 @@ public class Order {
     private Long id;
     private Long userId;
     private Long orderNumber;
-    private Date orderDate;
+    private LocalDate orderDate;
+
     @Enumerated(EnumType.STRING)
     private OrderStatuses orderStatus;
 }

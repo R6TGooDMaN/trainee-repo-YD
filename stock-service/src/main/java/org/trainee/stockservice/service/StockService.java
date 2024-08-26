@@ -1,13 +1,10 @@
 package org.trainee.stockservice.service;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.trainee.productservice.enums.EntityType;
 import org.trainee.productservice.exception.EntityNotFoundException;
-import org.trainee.productservice.model.Product;
 import org.trainee.stockservice.dto.ProductDto;
 import org.trainee.stockservice.dto.StockProductRequest;
 import org.trainee.stockservice.dto.StockProductResponse;
@@ -29,15 +26,15 @@ import java.util.List;
 public class StockService {
     private final StockRepository stockRepository;
     private final StockProductRepository stockProductRepository;
-    private RestTemplate restTemplate;
-    String productServiceUrl = "http://localhost:8080/api/v1/product/";
+    private final KafkaTemplate<String, Long> kafkaTemplate;
+    private final ProductConsumerService productConsumerService;
     final static String STOCK_ERROR_MESSAGE = "Entity with name: {0} and id {1} not found!";
 
-    @Autowired
-    public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, RestTemplate restTemplate) {
+    public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, Long> kafkaTemplate, ProductConsumerService productConsumerService) {
         this.stockRepository = stockRepository;
         this.stockProductRepository = stockProductRepository;
-        this.restTemplate = restTemplate;
+        this.kafkaTemplate = kafkaTemplate;
+        this.productConsumerService = productConsumerService;
     }
 
     public List<StockResponse> getAllStocks() {
@@ -60,14 +57,17 @@ public class StockService {
         String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), stockProductRequest.getProductId());
         stockRepository.findById(stockId)
                 .orElseThrow(() -> new EntityNotFoundException(stockMessage));
-        ProductDto product = restTemplate.getForObject(productServiceUrl + stockProductRequest.getProductId(), ProductDto.class);
+
+        kafkaTemplate.send("prouct-request-topic", stockProductRequest.getProductId());
+
+        ProductDto product = productConsumerService.getProductResponse(stockProductRequest.getProductId());
         if (product == null) {
             throw new EntityNotFoundException(productMessage);
         }
         StockProduct stockProductCheck = stockProductRepository.findByProductIdAndStockId(product.getId(), stockId).orElseThrow(() -> new EntityNotFoundException(productMessage));
         StockProduct stockProduct;
         if (stockProductCheck != null) {
-            stockProductCheck.setQuantity(stockProductCheck.getQuantity()+stockProductRequest.getQuantity());
+            stockProductCheck.setQuantity(stockProductCheck.getQuantity() + stockProductRequest.getQuantity());
             updateStockProductQuantity(product.getId(), stockId, stockProductRequest);
             return StockMapper.stockProductToResponse(stockProductCheck);
         } else {
@@ -94,7 +94,10 @@ public class StockService {
         String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
         stockRepository.findById(stockId)
                 .orElseThrow(() -> new EntityNotFoundException(stockMessage));
-        Product product = restTemplate.getForObject(productServiceUrl + productId, Product.class);
+
+        kafkaTemplate.send("product-request-topic", productId);
+
+        ProductDto product = productConsumerService.getProductResponse(productId);
         if (product == null) {
             throw new EntityNotFoundException(productMessage);
         }
@@ -108,13 +111,13 @@ public class StockService {
     }
 
     public StockProductResponse updateStockProductQuantity(Long stockId, Long productId, StockProductRequest stockProductRequest) {
-        return stockProductRepository.findByProductIdAndStockId(productId,stockId)
+        return stockProductRepository.findByProductIdAndStockId(productId, stockId)
                 .map(existingStock -> {
-                    StockProduct updatedStock = StockMapper.updateStockProductFromRequest(existingStock, stockProductRequest);
-                    StockProduct savedStock = stockProductRepository.save(updatedStock);
-                    return StockMapper.stockProductToResponse(savedStock);
+                            StockProduct updatedStock = StockMapper.updateStockProductFromRequest(existingStock, stockProductRequest);
+                            StockProduct savedStock = stockProductRepository.save(updatedStock);
+                            return StockMapper.stockProductToResponse(savedStock);
                         }
-                ).orElseThrow(()-> new EntityNotFoundException(STOCK_ERROR_MESSAGE));
+                ).orElseThrow(() -> new EntityNotFoundException(STOCK_ERROR_MESSAGE));
     }
 
     @Transactional
@@ -130,16 +133,18 @@ public class StockService {
         stockProduct.setQuantity(newQuantity);
         return stockProductRepository.save(stockProduct);
     }
+
     public StockProductResponse getProduct(Long productId) {
         String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
-        ResponseEntity<Product> response = restTemplate.getForEntity(productServiceUrl + productId, Product.class);
-        Product product = response.getBody();
-
+        kafkaTemplate.send("product-request-topic", productId);
+        ProductDto product = productConsumerService.getProductResponse(productId);
         if (product == null) {
             throw new EntityNotFoundException(productMessage);
         }
+
         StockProduct stockProduct = stockProductRepository.findByProductId(productId)
                 .orElseThrow(() -> new EntityNotFoundException(productMessage));
+
         StockProductResponse dto = new StockProductResponse();
         dto.setProductId(product.getId());
         dto.setQuantity(stockProduct.getQuantity());

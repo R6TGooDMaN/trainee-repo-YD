@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS orders(
     id BIGINT PRIMARY KEY DEFAULT nextval('orders_sequence'),
     user_id BIGINT NOT NULL,
     order_number BIGINT NOT NULL UNIQUE,
-    order_date TIMESTAMP NOT NULL,
+    order_date DATE NOT NULL,
     order_status VARCHAR(15) NOT NULL
 );
 

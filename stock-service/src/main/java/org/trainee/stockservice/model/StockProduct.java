@@ -1,7 +1,5 @@
 package org.trainee.stockservice.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -12,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.trainee.stockservice.key.StockProductKey;
 
 @Entity
 @Table(name = "stock_product")
@@ -20,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@IdClass(StockProduct.class)
+@IdClass(StockProductKey.class)
 public class StockProduct {
     @Id
     private Long stockId;
@@ -28,5 +27,6 @@ public class StockProduct {
     private Long productId;
     @Max(value = 400)
     private Integer quantity;
+
 
 }

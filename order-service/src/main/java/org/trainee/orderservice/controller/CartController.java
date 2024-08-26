@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.trainee.orderservice.dto.CartDto;
 import org.trainee.orderservice.service.CartService;
 
-import java.security.Principal;
-
 @RestController
 @RequestMapping("/api/v1/cart")
 public class CartController {

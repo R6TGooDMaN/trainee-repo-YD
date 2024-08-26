@@ -12,6 +12,8 @@ public class OrderMapper {
                 .Id(order.getId())
                 .userId(order.getUserId())
                 .orderNumber(order.getOrderNumber())
+                .orderDate(order.getOrderDate())
+                .orderStatus(order.getOrderStatus())
                 .build();
     }
 
@@ -19,12 +21,15 @@ public class OrderMapper {
         return Order.builder()
                 .userId(orderRequest.getUserId())
                 .orderNumber(orderRequest.getOrderNumber())
+                .orderDate(orderRequest.getOrderDate())
+                .orderStatus(orderRequest.getOrderStatus())
                 .build();
     }
 
     public Order updateOrderFromRequest(Order order, OrderRequest orderRequest) {
         order.setUserId(orderRequest.getUserId());
         order.setOrderNumber(orderRequest.getOrderNumber());
+        order.setOrderDate(orderRequest.getOrderDate());
         order.setOrderStatus(order.getOrderStatus());
         return order;
     }

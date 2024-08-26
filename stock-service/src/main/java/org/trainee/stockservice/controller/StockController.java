@@ -73,5 +73,12 @@ public class StockController {
         stockService.increaseProductQuantity(productId, stockId, quantity);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{productId}/products")
+    public ResponseEntity<StockProductResponse> getProductsInStock(@PathVariable Long productId) {
+        StockProductResponse stockProductResponse = stockService.getProduct(productId);
+        return ResponseEntity.ok(stockProductResponse);
+    }
+
 }
 

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.trainee.orderservice.enums.OrderStatuses;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -18,6 +19,6 @@ public class OrderResponse {
     private Long Id;
     private Long userId;
     private Long orderNumber;
-    private Date orderDate;
+    private LocalDate orderDate;
     private OrderStatuses orderStatus;
 }

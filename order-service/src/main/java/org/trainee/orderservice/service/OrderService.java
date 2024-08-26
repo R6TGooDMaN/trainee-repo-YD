@@ -1,8 +1,6 @@
 package org.trainee.orderservice.service;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.trainee.orderservice.clients.ProductClient;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
@@ -38,7 +36,7 @@ public class OrderService {
 
     public OrderResponse createOrder(OrderRequest orderRequest) {
         Cart cart = CartMapper.mapToCart(cartService.getCart(orderRequest.getUserId()));
-        Set<CartItems> itemsList= cart.getItems();
+        Set<CartItems> itemsList = cart.getItems();
         Order order = OrderMapper.mapToOrder(orderRequest);
         for (CartItems cartItems : itemsList) {
             ProductOrders productOrders = new ProductOrders();
