@@ -53,5 +53,3 @@ keycloak:
   endpoint: /realms/services-dev-realm/protocol/openid-connect/token
   client:
     secret: s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5
-kafka:
-  connectionUrl: localhost:9092

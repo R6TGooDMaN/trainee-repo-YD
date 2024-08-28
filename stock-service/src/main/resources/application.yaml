@@ -26,3 +26,5 @@ spring:
     baseline-on-migrate: true
 server:
   port: 8081
+kafka:
+  connectionUrl: localhost:9092
