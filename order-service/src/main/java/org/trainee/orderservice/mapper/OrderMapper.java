@@ -3,7 +3,11 @@ package org.trainee.orderservice.mapper;
 import lombok.experimental.UtilityClass;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
+import org.trainee.orderservice.model.CartItems;
 import org.trainee.orderservice.model.Order;
+import org.trainee.orderservice.model.ProductOrders;
+
+import java.util.Set;
 
 @UtilityClass
 public class OrderMapper {
@@ -32,5 +36,14 @@ public class OrderMapper {
         order.setOrderDate(orderRequest.getOrderDate());
         order.setOrderStatus(order.getOrderStatus());
         return order;
+    }
+    public ProductOrders cartItemHandling(Order order, Set<CartItems> itemsList){
+        ProductOrders productOrders = new ProductOrders();
+        for (CartItems cartItems : itemsList) {
+            productOrders.setOrderId(order.getId());
+            productOrders.setProductId(cartItems.getProductId());
+            productOrders.setQuantity(cartItems.getQuantity());
+        }
+       return productOrders;
     }
 }

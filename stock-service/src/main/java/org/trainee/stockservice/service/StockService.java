@@ -33,6 +33,7 @@ public class StockService {
     private final KafkaTemplate<String, Long> kafkaTemplate;
     private final ConcurrentMap<Long, CompletableFuture<ProductDto>> productFutures = new ConcurrentHashMap<>();
     final static String STOCK_ERROR_MESSAGE = "Entity with name: {0} and id {1} not found!";
+    private String REQUEST_TOPIC = "product-request-topic";
 
     public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, Long> kafkaTemplate) {
         this.stockRepository = stockRepository;
@@ -147,7 +148,7 @@ public class StockService {
     }
 
     private ProductDto requestProduct(Long productId){
-        kafkaTemplate.send("product-request-topic", productId);
+        kafkaTemplate.send(REQUEST_TOPIC, productId);
         CompletableFuture<ProductDto> future = new CompletableFuture<>();
         productFutures.put(productId,future);
         try {

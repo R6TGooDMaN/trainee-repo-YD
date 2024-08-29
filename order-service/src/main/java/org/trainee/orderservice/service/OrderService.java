@@ -38,13 +38,8 @@ public class OrderService {
         Cart cart = CartMapper.mapToCart(cartService.getCart(orderRequest.getUserId()));
         Set<CartItems> itemsList = cart.getItems();
         Order order = OrderMapper.mapToOrder(orderRequest);
-        for (CartItems cartItems : itemsList) {
-            ProductOrders productOrders = new ProductOrders();
-            productOrders.setOrderId(order.getId());
-            productOrders.setProductId(cartItems.getProductId());
-            productOrders.setQuantity(cartItems.getQuantity());
-            productOrderRepository.save(productOrders);
-        }
+        ProductOrders productOrders = OrderMapper.cartItemHandling(order,itemsList);
+        productOrderRepository.save(productOrders);
         Order savedOrder = orderRepository.save(order);
         return OrderMapper.mapToOrderResponse(savedOrder);
     }
