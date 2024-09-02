@@ -14,11 +14,6 @@ CREATE TABLE IF NOT EXISTS users(
     roles VARCHAR(10) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS roles(
-    user_id BIGINT NOT NULL,
-    role VARCHAR(50) NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS orders(
     id BIGINT PRIMARY KEY DEFAULT nextval('orders_sequence'),
     user_id BIGINT NOT NULL,

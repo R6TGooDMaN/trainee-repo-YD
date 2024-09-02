@@ -40,10 +40,14 @@ public class OrderMapper {
     public ProductOrders cartItemHandling(Order order, Set<CartItems> itemsList){
         ProductOrders productOrders = new ProductOrders();
         for (CartItems cartItems : itemsList) {
-            productOrders.setOrderId(order.getId());
-            productOrders.setProductId(cartItems.getProductId());
-            productOrders.setQuantity(cartItems.getQuantity());
+            buildProductOrders(productOrders, order, cartItems);
         }
        return productOrders;
+    }
+    public ProductOrders buildProductOrders(ProductOrders ordersProduct, Order order, CartItems items) {
+        ordersProduct.setOrderId(order.getId());
+        ordersProduct.setProductId(items.getProductId());
+        ordersProduct.setQuantity(items.getQuantity());
+        return ordersProduct;
     }
 }
