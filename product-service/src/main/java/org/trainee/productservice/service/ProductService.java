@@ -20,12 +20,12 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-    private final KafkaTemplate<String, ProductResponse> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private static final String PRODUCT_NOT_FOUND_MESSAGE = "Entity with name: {0} with ID: {1} not found";
     private String RESPONSE_TOPIC = "product-response-topic";
     private String PRODUCT_CREATED_TOPIC = "product-created-topic";
 
-    public ProductService(ProductRepository productRepository, ProductMapper productMapper, KafkaTemplate<String, ProductResponse> kafkaTemplate) {
+    public ProductService(ProductRepository productRepository, ProductMapper productMapper, KafkaTemplate<String, String> kafkaTemplate) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.kafkaTemplate = kafkaTemplate;
@@ -34,16 +34,16 @@ public class ProductService {
     public ProductResponse createProduct(ProductRequest productRequest) {
         Product product = productMapper.mapToProduct(productRequest);
         Product newProduct = productRepository.save(product);
-        kafkaTemplate.send(PRODUCT_CREATED_TOPIC, productMapper.mapToProductResponse(newProduct));
         return productMapper.mapToProductResponse(newProduct);
     }
 
     @KafkaListener(topics = "product-request-topic", groupId = "product-service-group")
-    public void findProductKafka(Long id) {
+    public void findProductKafka(String id) {
+        String cleanedProductIdStr = id.replace("\"", "");
+        Long productId = Long.parseLong(cleanedProductIdStr);
         String message = MessageFormat.format(PRODUCT_NOT_FOUND_MESSAGE, EntityType.PRODUCT.name(), id);
-        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(message));
-        ProductResponse productResponse = productMapper.mapToProductResponse(product);
-        kafkaTemplate.send(RESPONSE_TOPIC, productResponse);
+        Product product = productRepository.findById(productId).orElseThrow(() -> new EntityNotFoundException(message));
+        kafkaTemplate.send(RESPONSE_TOPIC, product.getId().toString());
     }
 
     public ProductResponse findProduct(Long id) {

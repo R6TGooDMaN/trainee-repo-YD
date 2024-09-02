@@ -30,12 +30,12 @@ import java.util.concurrent.ConcurrentMap;
 public class StockService {
     private final StockRepository stockRepository;
     private final StockProductRepository stockProductRepository;
-    private final KafkaTemplate<String, ProductDto> kafkaTemplate;
-    private final ConcurrentMap<Long, CompletableFuture<ProductDto>> productFutures = new ConcurrentHashMap<>();
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ConcurrentMap<Long, CompletableFuture<Long>> productFutures = new ConcurrentHashMap<>();
     final static String STOCK_ERROR_MESSAGE = "Entity with name: {0} and id {1} not found!";
     private String REQUEST_TOPIC = "product-request-topic";
 
-    public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, ProductDto> kafkaTemplate) {
+    public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.stockRepository = stockRepository;
         this.stockProductRepository = stockProductRepository;
         this.kafkaTemplate = kafkaTemplate;
@@ -62,20 +62,20 @@ public class StockService {
         stockRepository.findById(stockId)
                 .orElseThrow(() -> new EntityNotFoundException(stockMessage));
 
-       ProductDto product = requestProduct(stockProductRequest.getProductId());
-        if (product == null) {
+       Long id = requestProduct(stockProductRequest.getProductId());
+        if (id == null) {
             throw new EntityNotFoundException(productMessage);
         }
-        StockProduct stockProductCheck = stockProductRepository.findByProductIdAndStockId(product.getId(), stockId).orElseThrow(() -> new EntityNotFoundException(productMessage));
+        StockProduct stockProductCheck = stockProductRepository.findByProductIdAndStockId(id, stockId).orElseThrow(() -> new EntityNotFoundException(productMessage));
         StockProduct stockProduct;
         if (stockProductCheck != null) {
             stockProductCheck.setQuantity(stockProductCheck.getQuantity() + stockProductRequest.getQuantity());
-            updateStockProductQuantity(product.getId(), stockId, stockProductRequest);
+            updateStockProductQuantity(id, stockId, stockProductRequest);
             return StockMapper.stockProductToResponse(stockProductCheck);
         } else {
             stockProduct = StockMapper.requestToStockProduct(stockProductRequest);
             stockProduct.setStockId(stockId);
-            stockProduct.setProductId(product.getId());
+            stockProduct.setProductId(id);
             stockProduct.setQuantity(stockProductRequest.getQuantity());
             stockProductRepository.save(stockProduct);
             return StockMapper.stockProductToResponse(stockProduct);
@@ -97,12 +97,12 @@ public class StockService {
         stockRepository.findById(stockId)
                 .orElseThrow(() -> new EntityNotFoundException(stockMessage));
 
-        ProductDto product = requestProduct(productId);
-        if (product == null) {
+        Long id = requestProduct(productId);
+        if (id == null) {
             throw new EntityNotFoundException(productMessage);
         }
-        StockProductKey id = new StockProductKey(stockId, productId);
-        stockProductRepository.deleteById(id);
+        StockProductKey key = new StockProductKey(stockId, productId);
+        stockProductRepository.deleteById(key);
     }
 
     public boolean isInStock(Long stockId, Long productId) {
@@ -134,37 +134,36 @@ public class StockService {
         return stockProductRepository.save(stockProduct);
     }
 
-    public StockProductResponse getProduct(Long productId) {
+    public List<StockProductResponse> getProducts(Long productId) {
         String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
-
-        ProductDto product = requestProduct(productId);
-
-        StockProduct stockProduct = stockProductRepository.findByProductId(productId)
-                .orElseThrow(() -> new EntityNotFoundException(productMessage));
-        StockProductResponse dto = new StockProductResponse();
-        dto.setProductId(product.getId());
-        dto.setQuantity(stockProduct.getQuantity());
-        return dto;
+        Long id = requestProduct(productId);
+        List<StockProduct> stockProducts = stockProductRepository.findAllByProductId(id);
+        List<StockProductResponse> responses = new ArrayList<>();
+        for (StockProduct stockProduct : stockProducts) {
+            StockMapper.stockProductToResponse(stockProduct);
+            responses.add(StockMapper.stockProductToResponse(stockProduct));
+        }
+        return responses;
     }
 
-    private ProductDto requestProduct(ProductDto product){
-        kafkaTemplate.send(REQUEST_TOPIC, product);
-        CompletableFuture<ProductDto> future = new CompletableFuture<>();
-        productFutures.put(product,future);
+    private Long requestProduct(Long productId) {
+        kafkaTemplate.send("product-request-topic", productId.toString());
+        CompletableFuture<Long> future = new CompletableFuture<>();
+        productFutures.put(productId, future);
         try {
             return future.get();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get product response", e);
+            throw new RuntimeException("Не удалось получить данные о продукте", e);
         } finally {
             productFutures.remove(productId);
         }
     }
 
     @KafkaListener(topics = "product-response-topic", groupId = "stock-service-group")
-    public void consumeProductResponse(ProductDto productDto) {
-        CompletableFuture<ProductDto> future = productFutures.get(productDto.getId());
+    public void consumeProductResponse(Long id) {
+        CompletableFuture<Long> future = productFutures.get(id);
         if (future != null) {
-            future.complete(productDto);
+            future.complete(id);
         }
 
     }

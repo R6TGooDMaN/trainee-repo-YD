@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS product(
     price INTEGER NOT NULL CHECK (price > 0)
 );
 
+CREATE TYPE ROLES AS ENUM('ADMIN','USER');
+
 CREATE TABLE IF NOT EXISTS users(
     id BIGINT PRIMARY KEY DEFAULT nextval('users_sequence'),
     username VARCHAR(50) NOT NULL UNIQUE ,
@@ -28,7 +30,6 @@ CREATE TABLE IF NOT EXISTS product_order(
     quantity INTEGER NOT NULL
 );
 
-CREATE TYPE ROLES AS ENUM('ADMIN','USER');
 
 CREATE TABLE IF NOT EXISTS stock(
     id BIGINT PRIMARY KEY DEFAULT nextval('stock_sequence'),
