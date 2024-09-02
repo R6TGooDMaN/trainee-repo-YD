@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users(
     email VARCHAR(50) NOT NULL UNIQUE CHECK ( email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' ) ,
     password VARCHAR(50) NOT NULL,
     phone VARCHAR(50) NOT NULL UNIQUE CHECK ( phone ~* '^\+\d{12}$' ),
-    roles VARCHAR(10) NOT NULL
+    roles ROLES NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS orders(
@@ -28,10 +28,7 @@ CREATE TABLE IF NOT EXISTS product_order(
     quantity INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS roles(
-    user_id BIGINT NOT NULL,
-    role VARCHAR(50) NOT NULL
-);
+CREATE TYPE ROLES AS ENUM('ADMIN','USER');
 
 CREATE TABLE IF NOT EXISTS stock(
     id BIGINT PRIMARY KEY DEFAULT nextval('stock_sequence'),
