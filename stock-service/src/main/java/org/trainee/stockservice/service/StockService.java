@@ -30,12 +30,12 @@ import java.util.concurrent.ConcurrentMap;
 public class StockService {
     private final StockRepository stockRepository;
     private final StockProductRepository stockProductRepository;
-    private final KafkaTemplate<String, Long> kafkaTemplate;
+    private final KafkaTemplate<String, ProductDto> kafkaTemplate;
     private final ConcurrentMap<Long, CompletableFuture<ProductDto>> productFutures = new ConcurrentHashMap<>();
     final static String STOCK_ERROR_MESSAGE = "Entity with name: {0} and id {1} not found!";
     private String REQUEST_TOPIC = "product-request-topic";
 
-    public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, Long> kafkaTemplate) {
+    public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, ProductDto> kafkaTemplate) {
         this.stockRepository = stockRepository;
         this.stockProductRepository = stockProductRepository;
         this.kafkaTemplate = kafkaTemplate;
@@ -147,10 +147,10 @@ public class StockService {
         return dto;
     }
 
-    private ProductDto requestProduct(Long productId){
-        kafkaTemplate.send(REQUEST_TOPIC, productId);
+    private ProductDto requestProduct(ProductDto product){
+        kafkaTemplate.send(REQUEST_TOPIC, product);
         CompletableFuture<ProductDto> future = new CompletableFuture<>();
-        productFutures.put(productId,future);
+        productFutures.put(product,future);
         try {
             return future.get();
         } catch (Exception e) {

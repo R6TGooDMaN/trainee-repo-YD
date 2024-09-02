@@ -28,6 +28,11 @@ CREATE TABLE IF NOT EXISTS product_order(
     quantity INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS roles(
+    user_id BIGINT NOT NULL,
+    role VARCHAR(50) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS stock(
     id BIGINT PRIMARY KEY DEFAULT nextval('stock_sequence'),
     name VARCHAR(50) NOT NULL UNIQUE
