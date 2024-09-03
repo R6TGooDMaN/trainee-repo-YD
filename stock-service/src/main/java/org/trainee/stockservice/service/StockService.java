@@ -6,7 +6,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.trainee.productservice.enums.EntityType;
 import org.trainee.productservice.exception.EntityNotFoundException;
-import org.trainee.stockservice.dto.ProductDto;
 import org.trainee.stockservice.dto.StockProductRequest;
 import org.trainee.stockservice.dto.StockProductResponse;
 import org.trainee.stockservice.dto.StockRequest;
@@ -32,7 +31,7 @@ public class StockService {
     private final StockProductRepository stockProductRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ConcurrentMap<Long, CompletableFuture<Long>> productFutures = new ConcurrentHashMap<>();
-    final static String STOCK_ERROR_MESSAGE = "Entity with name: {0} and id {1} not found!";
+    private final static String STOCK_ERROR_MESSAGE = "Entity with name: {0} and id {1} not found!";
     private String REQUEST_TOPIC = "product-request-topic";
 
     public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, String> kafkaTemplate) {
@@ -62,7 +61,7 @@ public class StockService {
         stockRepository.findById(stockId)
                 .orElseThrow(() -> new EntityNotFoundException(stockMessage));
 
-       Long id = requestProduct(stockProductRequest.getProductId());
+        Long id = requestProduct(stockProductRequest.getProductId());
         if (id == null) {
             throw new EntityNotFoundException(productMessage);
         }
@@ -147,7 +146,7 @@ public class StockService {
     }
 
     private Long requestProduct(Long productId) {
-        kafkaTemplate.send("product-request-topic", productId.toString());
+        kafkaTemplate.send(REQUEST_TOPIC, productId.toString());
         CompletableFuture<Long> future = new CompletableFuture<>();
         productFutures.put(productId, future);
         try {
