@@ -1,9 +1,12 @@
 package org.trainee.orderservice.service;
 
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.trainee.orderservice.clients.ProductClient;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
+import org.trainee.orderservice.dto.ProductOrderResponse;
 import org.trainee.orderservice.enums.OrderStatuses;
 import org.trainee.orderservice.exception.OrderNotFoundMessage;
 import org.trainee.orderservice.mapper.CartMapper;
@@ -16,8 +19,12 @@ import org.trainee.orderservice.repository.OrderRepository;
 import org.trainee.orderservice.repository.ProductOrderRepository;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class OrderService {
@@ -26,12 +33,17 @@ public class OrderService {
     public final CartService cartService;
     public final ProductClient productClient;
     public final ProductOrderRepository productOrderRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ConcurrentMap<Long, CompletableFuture<Long>> productFutures = new ConcurrentHashMap<>();
+    private String REQUEST_TOPIC = "product-request-topic";
 
-    public OrderService(OrderRepository orderRepository, CartService cartService, ProductClient productClient, ProductOrderRepository productOrderRepository) {
+
+    public OrderService(OrderRepository orderRepository, CartService cartService, ProductClient productClient, ProductOrderRepository productOrderRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.productClient = productClient;
         this.productOrderRepository = productOrderRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public OrderResponse createOrder(OrderRequest orderRequest) {
@@ -83,6 +95,37 @@ public class OrderService {
         order.setOrderStatus(OrderStatuses.CLOSED);
         orderRepository.save(order);
     }
+
+    private Long requestProduct(Long productId) {
+        kafkaTemplate.send(REQUEST_TOPIC, productId.toString());
+        CompletableFuture<Long> future = new CompletableFuture<>();
+        productFutures.put(productId, future);
+        try {
+            return future.get();
+        } catch (Exception e) {
+            throw new RuntimeException("Не удалось получить данные о продукте", e);
+        } finally {
+            productFutures.remove(productId);
+        }
+    }
+
+    @KafkaListener(topics = "product-response-topic", groupId = "stock-service-group")
+    public void consumeProductResponse(Long id) {
+        CompletableFuture<Long> future = productFutures.get(id);
+        if (future != null) {
+            future.complete(id);
+        }
+    }
+        public List<ProductOrderResponse> getProducts(Long productId) {
+            String productMessage = MessageFormat.format(ORDER_NOT_FOUND_MESSAGE, productClient.getOrderType(), productId);
+            Long id = requestProduct(productId);
+            List<ProductOrders> orderProducts = productOrderRepository.findAllByProductId(id);
+            List<ProductOrderResponse> responses = new ArrayList<>();
+            for (ProductOrders productOrders: orderProducts) {
+                responses.add(OrderMapper.productOrderToResponse(productOrders));
+            }
+            return responses;
+        }
 
 
 }

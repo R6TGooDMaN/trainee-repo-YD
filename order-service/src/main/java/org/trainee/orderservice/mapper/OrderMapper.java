@@ -3,6 +3,8 @@ package org.trainee.orderservice.mapper;
 import lombok.experimental.UtilityClass;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
+import org.trainee.orderservice.dto.ProductOrderRequest;
+import org.trainee.orderservice.dto.ProductOrderResponse;
 import org.trainee.orderservice.model.CartItems;
 import org.trainee.orderservice.model.Order;
 import org.trainee.orderservice.model.ProductOrders;
@@ -27,6 +29,22 @@ public class OrderMapper {
                 .orderNumber(orderRequest.getOrderNumber())
                 .orderDate(orderRequest.getOrderDate())
                 .orderStatus(orderRequest.getOrderStatus())
+                .build();
+    }
+
+    public ProductOrders mapToProductOrders(ProductOrderRequest request) {
+        return ProductOrders.builder()
+                .orderId(request.getOrderId())
+                .productId(request.getProductId())
+                .quantity(request.getQuantity())
+                .build();
+    }
+
+    public ProductOrderResponse productOrderToResponse(ProductOrders productOrders) {
+        return ProductOrderResponse.builder()
+                .orderId(productOrders.getOrderId())
+                .productId(productOrders.getProductId())
+                .quantity(productOrders.getQuantity())
                 .build();
     }
 

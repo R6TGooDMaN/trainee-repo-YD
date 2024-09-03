@@ -20,7 +20,7 @@ public class ProductClient {
 
     private final RestTemplate restTemplate;
     private final String serviceUrl;
-    private final String productUrl = "/api/v1/products";
+    private final String productUrl = "/api/v1/product";
     private final String productTypeEntityUrl = "/etype_product";
     private final String orderTypeEntityUrl = "/etype_order";
     private final String userTypeEntityUrl = "/etype_user";

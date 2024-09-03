@@ -23,7 +23,6 @@ public class ProductService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private static final String PRODUCT_NOT_FOUND_MESSAGE = "Entity with name: {0} with ID: {1} not found";
     private String RESPONSE_TOPIC = "product-response-topic";
-    private String PRODUCT_CREATED_TOPIC = "product-created-topic";
 
     public ProductService(ProductRepository productRepository, ProductMapper productMapper, KafkaTemplate<String, String> kafkaTemplate) {
         this.productRepository = productRepository;

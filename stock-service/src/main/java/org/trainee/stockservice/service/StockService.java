@@ -40,6 +40,8 @@ public class StockService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+
+
     public List<StockResponse> getAllStocks() {
         return stockRepository.findAll().stream().map(StockMapper::stockToResponse).toList();
     }

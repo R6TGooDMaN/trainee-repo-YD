@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
+import org.trainee.orderservice.dto.ProductOrderResponse;
 import org.trainee.orderservice.enums.OrderStatuses;
 import org.trainee.orderservice.service.OrderService;
 
@@ -61,9 +62,16 @@ public class OrderController {
         orderService.cancelOrder(id);
         return ResponseEntity.ok().build();
     }
+
     @PatchMapping("/{id}/pay")
     public ResponseEntity<OrderResponse> payOrder(@PathVariable Long id) {
         orderService.payOrder(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{productId}/products")
+    public ResponseEntity<List<ProductOrderResponse>> getProductsInOrders(@PathVariable Long productId) {
+        List<ProductOrderResponse> productOrderResponses = orderService.getProducts(productId);
+        return ResponseEntity.ok(productOrderResponses);
     }
 }
