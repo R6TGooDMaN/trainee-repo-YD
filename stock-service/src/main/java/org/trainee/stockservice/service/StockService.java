@@ -4,12 +4,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.trainee.productservice.enums.EntityType;
-import org.trainee.productservice.exception.EntityNotFoundException;
+import org.trainee.stockservice.client.ProductClient;
 import org.trainee.stockservice.dto.StockProductRequest;
 import org.trainee.stockservice.dto.StockProductResponse;
 import org.trainee.stockservice.dto.StockRequest;
 import org.trainee.stockservice.dto.StockResponse;
+import org.trainee.stockservice.exception.StockNotFoundException;
 import org.trainee.stockservice.key.StockProductKey;
 import org.trainee.stockservice.mapper.StockMapper;
 import org.trainee.stockservice.model.Stock;
@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class StockService {
+    private final ProductClient productClient;
     private final StockRepository stockRepository;
     private final StockProductRepository stockProductRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -34,12 +35,12 @@ public class StockService {
     private final static String STOCK_ERROR_MESSAGE = "Entity with name: {0} and id {1} not found!";
     private String REQUEST_TOPIC = "product-request-topic";
 
-    public StockService(StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public StockService(ProductClient productClient, StockRepository stockRepository, StockProductRepository stockProductRepository, KafkaTemplate<String, String> kafkaTemplate) {
+        this.productClient = productClient;
         this.stockRepository = stockRepository;
         this.stockProductRepository = stockProductRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
-
 
 
     public List<StockResponse> getAllStocks() {
@@ -47,7 +48,8 @@ public class StockService {
     }
 
     public StockResponse getStockById(Long id) {
-        Stock stock = stockRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("m"));
+        String message = MessageFormat.format(STOCK_ERROR_MESSAGE, productClient.getStockType(), id);
+        Stock stock = stockRepository.findById(id).orElseThrow(() -> new StockNotFoundException(message));
         return StockMapper.stockToResponse(stock);
     }
 
@@ -58,16 +60,16 @@ public class StockService {
 
     @Transactional
     public StockProductResponse addProduct(Long stockId, StockProductRequest stockProductRequest) {
-        String stockMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.STOCK.name(), stockId);
-        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), stockProductRequest.getProductId());
+        String stockMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, productClient.getStockType(), stockId);
+        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, productClient.getProductType(), stockProductRequest.getProductId());
         stockRepository.findById(stockId)
-                .orElseThrow(() -> new EntityNotFoundException(stockMessage));
+                .orElseThrow(() -> new StockNotFoundException(stockMessage));
 
         Long id = requestProduct(stockProductRequest.getProductId());
         if (id == null) {
-            throw new EntityNotFoundException(productMessage);
+            throw new StockNotFoundException(productMessage);
         }
-        StockProduct stockProductCheck = stockProductRepository.findByProductIdAndStockId(id, stockId).orElseThrow(() -> new EntityNotFoundException(productMessage));
+        StockProduct stockProductCheck = stockProductRepository.findByProductIdAndStockId(id, stockId).orElseThrow(() -> new StockNotFoundException(productMessage));
         StockProduct stockProduct;
         if (stockProductCheck != null) {
             stockProductCheck.setQuantity(stockProductCheck.getQuantity() + stockProductRequest.getQuantity());
@@ -93,14 +95,14 @@ public class StockService {
     }
 
     public void removeProduct(Long stockId, Long productId) {
-        String stockMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.STOCK.name(), stockId);
-        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
+        String stockMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, productClient.getStockType(), stockId);
+        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, productClient.getProductType(), productId);
         stockRepository.findById(stockId)
-                .orElseThrow(() -> new EntityNotFoundException(stockMessage));
+                .orElseThrow(() -> new StockNotFoundException(stockMessage));
 
         Long id = requestProduct(productId);
         if (id == null) {
-            throw new EntityNotFoundException(productMessage);
+            throw new StockNotFoundException(productMessage);
         }
         StockProductKey key = new StockProductKey(stockId, productId);
         stockProductRepository.deleteById(key);
@@ -118,14 +120,14 @@ public class StockService {
                             StockProduct savedStock = stockProductRepository.save(updatedStock);
                             return StockMapper.stockProductToResponse(savedStock);
                         }
-                ).orElseThrow(() -> new EntityNotFoundException(STOCK_ERROR_MESSAGE));
+                ).orElseThrow(() -> new StockNotFoundException(STOCK_ERROR_MESSAGE));
     }
 
     @Transactional
     public StockProduct increaseProductQuantity(Long productId, Long stockId, int quantityChange) {
-        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
+        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, productClient.getProductType(), productId);
         StockProduct stockProduct = stockProductRepository.findByProductIdAndStockId(productId, stockId)
-                .orElseThrow(() -> new EntityNotFoundException(productMessage));
+                .orElseThrow(() -> new StockNotFoundException(productMessage));
 
         int newQuantity = stockProduct.getQuantity() + quantityChange;
         if (newQuantity < 0) {
@@ -136,7 +138,7 @@ public class StockService {
     }
 
     public List<StockProductResponse> getProducts(Long productId) {
-        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, EntityType.PRODUCT.name(), productId);
+        String productMessage = MessageFormat.format(STOCK_ERROR_MESSAGE, productClient.getProductType(), productId);
         Long id = requestProduct(productId);
         List<StockProduct> stockProducts = stockProductRepository.findAllByProductId(id);
         List<StockProductResponse> responses = new ArrayList<>();

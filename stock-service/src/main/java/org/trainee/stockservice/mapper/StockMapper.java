@@ -1,8 +1,6 @@
 package org.trainee.stockservice.mapper;
 
 import lombok.experimental.UtilityClass;
-import org.trainee.productservice.dto.ProductRequest;
-import org.trainee.productservice.model.Product;
 import org.trainee.stockservice.dto.StockProductRequest;
 import org.trainee.stockservice.dto.StockProductResponse;
 import org.trainee.stockservice.dto.StockRequest;
