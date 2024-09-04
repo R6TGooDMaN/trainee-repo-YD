@@ -21,6 +21,4 @@ public class StockRequest {
     @Size(max = 300, message = "Name cannot exceed 300 characters")
     private String name;
 
-    @NotNull(message = "List cannot be empty!")
-    private List<StockProductRequest> stockProductRequests;
 }

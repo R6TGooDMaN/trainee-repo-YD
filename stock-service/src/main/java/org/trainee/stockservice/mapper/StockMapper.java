@@ -1,7 +1,6 @@
 package org.trainee.stockservice.mapper;
 
 import lombok.experimental.UtilityClass;
-import org.trainee.productservice.model.Product;
 import org.trainee.stockservice.dto.StockProductRequest;
 import org.trainee.stockservice.dto.StockProductResponse;
 import org.trainee.stockservice.dto.StockRequest;
@@ -15,10 +14,6 @@ public class StockMapper {
     public static Stock requestToStock(StockRequest stockRequest) {
         return Stock.builder()
                 .name(stockRequest.getName())
-                .stockProducts(stockRequest.getStockProductRequests()
-                        .stream()
-                        .map(StockMapper::requestToStockProduct)
-                        .toList())
                 .build();
     }
 
@@ -26,28 +21,30 @@ public class StockMapper {
         return StockResponse.builder()
                 .id(stock.getId())
                 .name(stock.getName())
-                .stockProductResponses(stock.getStockProducts().stream()
-                        .map(StockMapper::stockProductToResponse)
-                        .toList())
                 .build();
     }
 
     public static StockProductResponse stockProductToResponse(StockProduct stockProduct) {
         return StockProductResponse.builder()
-                .productId(stockProduct.getProduct().getId())
-                .stockId(stockProduct.getStock().getId())
+                .productId(stockProduct.getProductId())
+                .stockId(stockProduct.getStockId())
                 .quantity(stockProduct.getQuantity())
                 .build();
     }
 
     public static StockProduct requestToStockProduct(StockProductRequest stockProductRequest) {
-        Product product = Product.builder()
-                .id(stockProductRequest.getProductId())
-                .build();
-
         return StockProduct.builder()
-                .product(product)
+                .stockId(stockProductRequest.getStockId())
+                .productId(stockProductRequest.getProductId())
                 .quantity(stockProductRequest.getQuantity())
                 .build();
     }
+
+    public StockProduct updateStockProductFromRequest(StockProduct stockProduct, StockProductRequest productStockRequest) {
+        stockProduct.setStockId(productStockRequest.getStockId());
+        stockProduct.setProductId(productStockRequest.getProductId());
+        stockProduct.setQuantity(productStockRequest.getQuantity());
+        return stockProduct;
+    }
+
 }

@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
+import org.trainee.orderservice.dto.ProductOrderResponse;
 import org.trainee.orderservice.enums.OrderStatuses;
 import org.trainee.orderservice.service.OrderService;
 
@@ -53,5 +55,23 @@ public class OrderController {
     public ResponseEntity<OrderResponse> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
+        orderService.cancelOrder(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/pay")
+    public ResponseEntity<OrderResponse> payOrder(@PathVariable Long id) {
+        orderService.payOrder(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{productId}/products")
+    public ResponseEntity<List<ProductOrderResponse>> getProductsInOrders(@PathVariable Long productId) {
+        List<ProductOrderResponse> productOrderResponses = orderService.getProducts(productId);
+        return ResponseEntity.ok(productOrderResponses);
     }
 }

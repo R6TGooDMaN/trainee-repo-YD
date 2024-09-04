@@ -1,4 +1,4 @@
-package org.trainee.orderservice.clients;
+package org.trainee.stockservice.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -8,10 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.trainee.orderservice.dto.ProductDto;
-import org.trainee.orderservice.dto.UserDto;
-import org.trainee.orderservice.exception.NoProductException;
-import org.trainee.orderservice.exception.NoUserException;
+import org.trainee.stockservice.dto.ProductDto;
+import org.trainee.stockservice.exception.NoProductException;
 
 import java.text.MessageFormat;
 
@@ -24,6 +22,7 @@ public class ProductClient {
     private final String productTypeEntityUrl = "/etype_product";
     private final String orderTypeEntityUrl = "/etype_order";
     private final String userTypeEntityUrl = "/etype_user";
+    private final String stockTypeEntityUrl = "/etype_stock";
     private final String NO_PRODUCT_MESSAGE = "There is no product with id: {0}";
 
     public ProductClient(RestTemplate restTemplate, @Value("${product-service.url}") String serviceUrl) {
@@ -51,6 +50,9 @@ public class ProductClient {
     }
     public String getUserType(){
         return restTemplate.getForObject(serviceUrl + productUrl + userTypeEntityUrl, String.class);
+    }
+    public String getStockType(){
+        return restTemplate.getForObject(serviceUrl + productUrl + stockTypeEntityUrl, String.class);
     }
 
 }

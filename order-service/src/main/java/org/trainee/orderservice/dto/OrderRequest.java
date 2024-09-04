@@ -11,7 +11,7 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 import org.trainee.orderservice.enums.OrderStatuses;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -26,7 +26,7 @@ public class OrderRequest {
     @Size(min = 1, max = 50)
     private Long orderNumber;
     @NotNull
-    private Date orderDate;
+    private LocalDate orderDate;
     @NotNull
     private OrderStatuses orderStatus;
 }

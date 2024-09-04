@@ -43,6 +43,10 @@ public class ProductController {
     public String getUserEntityType(){
         return EntityType.USER.name();
     }
+    @GetMapping("/etype_user")
+    public String getStockEntityType(){
+        return EntityType.STOCK.name();
+    }
 
 
     @PostMapping("/save")

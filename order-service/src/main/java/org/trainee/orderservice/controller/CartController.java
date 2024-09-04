@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.trainee.orderservice.dto.CartDto;
 import org.trainee.orderservice.service.CartService;
 
-import java.security.Principal;
-
 @RestController
 @RequestMapping("/api/v1/cart")
 public class CartController {
@@ -25,7 +23,7 @@ public class CartController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<CartDto> getCart(@PathVariable Long userId, Principal principal) {
+    public ResponseEntity<CartDto> getCart(@PathVariable Long userId) {
         return ResponseEntity.ok(cartService.getCart(userId));
     }
 
@@ -46,4 +44,6 @@ public class CartController {
         cartService.clearCart(userId);
         return ResponseEntity.ok().build();
     }
+
+
 }
