@@ -1,37 +1,9 @@
 spring:
-  jpa:
-    properties:
-      hibernate:
-        default_schema: product-schemas
   application:
     name: product-service
-  cloud:
-    config:
-      import-check:
-        enabled: false
-      fail-fast: true
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/microservice-shop-database
-    username: postgres
-    password: 12345679
-  flyway:
-    user: postgres
-    password: 12345679
-    schemas: product-schemas
-    url: jdbc:postgresql://localhost:5432/microservice-shop-database
-    enabled: true
-    locations: filesystem:D:/repos/trainee-repo-YD/migration-service/src/main/resources/migration
-    default-schema: product-schemas
-    baseline-on-migrate: true
-#    eureka:
-#      instance:
-#        prefer-ip-address: true
-#      client:
-#        register-with-eureka: true
-#        fetch-registry: true
-#        service-url:
-#          defaultZone: http:/localhost:8761/eureka/
-
+  config:
+    import: optional:configserver:http://localhost:8180
+  profiles:
+    active: dev
 server:
   port: 8080

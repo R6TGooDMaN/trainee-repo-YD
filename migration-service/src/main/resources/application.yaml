@@ -1,3 +1,9 @@
 spring:
   application:
     name: migration-service
+  config:
+    import: optional:configserver:http://localhost:8180
+  profiles:
+    active: dev
+server:
+  port: 8181

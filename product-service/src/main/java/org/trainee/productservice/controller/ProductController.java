@@ -43,7 +43,7 @@ public class ProductController {
     public String getUserEntityType(){
         return EntityType.USER.name();
     }
-    @GetMapping("/etype_user")
+    @GetMapping("/etype_stock")
     public String getStockEntityType(){
         return EntityType.STOCK.name();
     }

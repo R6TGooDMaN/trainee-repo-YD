@@ -1,55 +1,12 @@
 spring:
-  data:
-    redis:
-      port: 6379
-      host: localhost
-      database: 0
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
-          max-wait: 60s
-      connect-timeout: 60s
-  cache:
-    type: redis
-    redis:
-      time-to-live: 60
-      cache-null-values: true
-      use-key-prefix: false
-  jpa:
-    properties:
-      hibernate:
-        default_schema: product-schemas
   application:
     name: order-service
-  cloud:
-    config:
-      import-check:
-        enabled: false
-      fail-fast: true
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/microservice-shop-database
-    username: postgres
-    password: 12345679
-  flyway:
-    user: postgres
-    password: 12345679
-    schemas: product-schemas
-    url: jdbc:postgresql://localhost:5432/microservice-shop-database
-    enabled: true
-    locations: filesystem:D:/repos/trainee-repo-YD/migration-service/src/main/resources/migration
-    default-schema: product-schemas
-    baseline-on-migrate: true
+  config:
+    import: optional:configserver:http://localhost:8180
+  profiles:
+    active: dev
 server:
-  port: 8083
-
+  port: 8082
 product-service.url: http://localhost:8080
 stock-service.url: http://localhost:8081
 user-service.url: http://localhost:8082
-keycloak:
-  port: http://localhost:8888
-  endpoint: /realms/services-dev-realm/protocol/openid-connect/token
-  client:
-    secret: s3wcVNRzWt4SJfOJhVkwvted3VzoVYn5
