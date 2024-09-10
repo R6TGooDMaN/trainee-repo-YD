@@ -5,12 +5,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.trainee.orderservice.dto.StockProductDto;
 
+import java.text.MessageFormat;
+
 @Component
 public class StockClient {
     private final RestTemplate restTemplate;
-    private final String stockUrl = "api/v1/stock/";
-    private final String slash = "/";
+    private final String stockUrl = "api/v1/stock";
     private final String serviceUrl;
+    private String formattedUrl="{0}/{1}/{2}/{3}";
 
     public StockClient(RestTemplate restTemplate, @Value("${stock-service.url}") String serviceUrl) {
         this.restTemplate = restTemplate;
@@ -22,7 +24,8 @@ public class StockClient {
     }
 
     public void UpdateProductQuantity(Integer productId, Integer quantity) {
-        restTemplate.put(serviceUrl + stockUrl + productId + slash + quantity, quantity);
+        String url = MessageFormat.format(formattedUrl, serviceUrl, stockUrl, productId, quantity);
+        restTemplate.put(url, quantity);
     }
 
 }

@@ -19,12 +19,15 @@ import org.trainee.orderservice.repository.OrderRepository;
 import org.trainee.orderservice.repository.ProductOrderRepository;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -50,7 +53,7 @@ public class OrderService {
         Cart cart = CartMapper.mapToCart(cartService.getCart(orderRequest.getUserId()));
         Set<CartItems> itemsList = cart.getItems();
         Order order = OrderMapper.mapToOrder(orderRequest);
-        ProductOrders productOrders = OrderMapper.cartItemHandling(order,itemsList);
+        ProductOrders productOrders = OrderMapper.cartItemHandling(order, itemsList);
         productOrderRepository.save(productOrders);
         Order savedOrder = orderRepository.save(order);
         return OrderMapper.mapToOrderResponse(savedOrder);
@@ -62,11 +65,27 @@ public class OrderService {
         return OrderMapper.mapToOrderResponse(order);
     }
 
-    public List<OrderResponse> getAllOrders() {
+    public List<OrderResponse> getAllOrders(LocalDate date, String sortBy) {
         List<Order> orders = orderRepository.findAll();
-        return orders.stream()
-                .map(OrderMapper::mapToOrderResponse)
-                .toList();
+        if (date != null) {
+            orders = orders.stream()
+                    .filter(order -> order.getOrderDate().equals(date))
+                    .collect(Collectors.toList());
+        }
+
+        if (sortBy != null) {
+            if (sortBy.equalsIgnoreCase("date")) {
+                orders.sort(Comparator.comparing(Order::getOrderDate));
+            } else {
+                throw new RuntimeException("Unsupported sort by: " + sortBy);
+            }
+        }
+        List<OrderResponse> responses = new ArrayList<>();
+        for (Order order : orders) {
+            responses.add(OrderMapper.mapToOrderResponse(order));
+        }
+
+        return responses;
     }
 
     public OrderResponse updateOrderStatus(Long id, OrderRequest orderRequest, OrderStatuses status) {
@@ -103,7 +122,7 @@ public class OrderService {
         try {
             return future.get();
         } catch (Exception e) {
-            throw new RuntimeException("Не удалось получить данные о продукте", e);
+            throw new RuntimeException("No product data available", e);
         } finally {
             productFutures.remove(productId);
         }
@@ -116,16 +135,17 @@ public class OrderService {
             future.complete(id);
         }
     }
-        public List<ProductOrderResponse> getProducts(Long productId) {
-            String productMessage = MessageFormat.format(ORDER_NOT_FOUND_MESSAGE, productClient.getOrderType(), productId);
-            Long id = requestProduct(productId);
-            List<ProductOrders> orderProducts = productOrderRepository.findAllByProductId(id);
-            List<ProductOrderResponse> responses = new ArrayList<>();
-            for (ProductOrders productOrders: orderProducts) {
-                responses.add(OrderMapper.productOrderToResponse(productOrders));
-            }
-            return responses;
+
+    public List<ProductOrderResponse> getProducts(Long productId) {
+        String productMessage = MessageFormat.format(ORDER_NOT_FOUND_MESSAGE, productClient.getOrderType(), productId);
+        Long id = requestProduct(productId);
+        List<ProductOrders> orderProducts = productOrderRepository.findAllByProductId(id);
+        List<ProductOrderResponse> responses = new ArrayList<>();
+        for (ProductOrders productOrders : orderProducts) {
+            responses.add(OrderMapper.productOrderToResponse(productOrders));
         }
+        return responses;
+    }
 
 
 }

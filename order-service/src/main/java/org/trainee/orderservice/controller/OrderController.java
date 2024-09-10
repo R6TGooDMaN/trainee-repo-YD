@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
@@ -17,6 +18,7 @@ import org.trainee.orderservice.dto.ProductOrderResponse;
 import org.trainee.orderservice.enums.OrderStatuses;
 import org.trainee.orderservice.service.OrderService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -30,8 +32,8 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+    public ResponseEntity<List<OrderResponse>> getAllOrders(@RequestParam(required = false) LocalDate date, @RequestParam(required = false) String sortBy) {
+        return ResponseEntity.ok(orderService.getAllOrders(date, sortBy));
     }
 
     @GetMapping("/{id}")
