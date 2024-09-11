@@ -136,10 +136,9 @@ public class OrderService {
         }
     }
 
-    public List<ProductOrderResponse> getProducts(Long productId) {
-        String productMessage = MessageFormat.format(ORDER_NOT_FOUND_MESSAGE, productClient.getOrderType(), productId);
-        Long id = requestProduct(productId);
-        List<ProductOrders> orderProducts = productOrderRepository.findAllByProductId(id);
+    public List<ProductOrderResponse> getProductsInOrder(Long orderId) {
+        String productMessage = MessageFormat.format(ORDER_NOT_FOUND_MESSAGE, productClient.getOrderType(), orderId);
+        List<ProductOrders> orderProducts = productOrderRepository.findAllByOrderId(orderId);
         List<ProductOrderResponse> responses = new ArrayList<>();
         for (ProductOrders productOrders : orderProducts) {
             responses.add(OrderMapper.productOrderToResponse(productOrders));
