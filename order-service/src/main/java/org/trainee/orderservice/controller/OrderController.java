@@ -19,6 +19,7 @@ import org.trainee.orderservice.enums.OrderStatuses;
 import org.trainee.orderservice.service.OrderService;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -32,13 +33,21 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrders(@RequestParam(required = false) LocalDate date, @RequestParam(required = false) String sortBy) {
-        return ResponseEntity.ok(orderService.getAllOrders(date, sortBy));
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrder(id));
+    }
+
+    @GetMapping("/filtered")
+    public ResponseEntity<List<OrderResponse>> getFilteredOrders(@RequestParam(required = false) OrderStatuses status,
+                                                                 @RequestParam(required = false) LocalDate date,
+                                                                 @RequestParam(required = false) String sortBy) {
+        List<OrderResponse> orders = orderService.getOrdersFiltered(status,date,sortBy);
+        return ResponseEntity.ok(orders);
     }
 
     @PostMapping("/open")

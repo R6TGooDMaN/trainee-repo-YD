@@ -1,5 +1,6 @@
 package org.trainee.orderservice.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,11 @@ import org.trainee.orderservice.model.Order;
 import org.trainee.orderservice.model.ProductOrders;
 import org.trainee.orderservice.repository.OrderRepository;
 import org.trainee.orderservice.repository.ProductOrderRepository;
+import org.trainee.orderservice.specifications.OrderSpecification;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -65,27 +66,12 @@ public class OrderService {
         return OrderMapper.mapToOrderResponse(order);
     }
 
-    public List<OrderResponse> getAllOrders(LocalDate date, String sortBy) {
+    public List<OrderResponse> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
-        if (date != null) {
-            orders = orders.stream()
-                    .filter(order -> order.getOrderDate().equals(date))
-                    .collect(Collectors.toList());
-        }
 
-        if (sortBy != null) {
-            if (sortBy.equalsIgnoreCase("date")) {
-                orders.sort(Comparator.comparing(Order::getOrderDate));
-            } else {
-                throw new RuntimeException("Unsupported sort by: " + sortBy);
-            }
-        }
-        List<OrderResponse> responses = new ArrayList<>();
-        for (Order order : orders) {
-            responses.add(OrderMapper.mapToOrderResponse(order));
-        }
-
-        return responses;
+        return orders.stream()
+                .map(OrderMapper::mapToOrderResponse)
+                .collect(Collectors.toList());
     }
 
     public OrderResponse updateOrderStatus(Long id, OrderRequest orderRequest, OrderStatuses status) {
@@ -139,11 +125,23 @@ public class OrderService {
     public List<ProductOrderResponse> getProductsInOrder(Long orderId) {
         String productMessage = MessageFormat.format(ORDER_NOT_FOUND_MESSAGE, productClient.getOrderType(), orderId);
         List<ProductOrders> orderProducts = productOrderRepository.findAllByOrderId(orderId);
-        List<ProductOrderResponse> responses = new ArrayList<>();
-        for (ProductOrders productOrders : orderProducts) {
-            responses.add(OrderMapper.productOrderToResponse(productOrders));
+        return orderProducts.stream()
+                .map(OrderMapper::productOrderToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<OrderResponse> getOrdersFiltered(OrderStatuses status, LocalDate date, String sortBy) {
+        Specification<Order> specification = Specification.where(OrderSpecification.hasStatus(status))
+                .and(OrderSpecification.hasDate(date));
+        if ("asc".equalsIgnoreCase(sortBy)) {
+            specification = specification.and(OrderSpecification.orderByDateAsc());
+        } else if ("desc".equalsIgnoreCase(sortBy)) {
+            specification = specification.and(OrderSpecification.orderByDateDesc());
         }
-        return responses;
+        List<Order> orders = orderRepository.findAll(specification);
+        return orders.stream()
+                .map(OrderMapper::mapToOrderResponse)
+                .collect(Collectors.toList());
     }
 
 
