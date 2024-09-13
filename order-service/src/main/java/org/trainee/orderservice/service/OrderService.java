@@ -5,6 +5,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.trainee.orderservice.clients.ProductClient;
+import org.trainee.orderservice.dto.FiltersDto;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
 import org.trainee.orderservice.dto.ProductOrderResponse;
@@ -22,7 +23,6 @@ import org.trainee.orderservice.specifications.OrderSpecification;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -38,6 +38,7 @@ public class OrderService {
     public final ProductClient productClient;
     public final ProductOrderRepository productOrderRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final String KAFKA_PRODUCT_NOT_AVAILABLE = "No product data available";
     private final ConcurrentMap<Long, CompletableFuture<Long>> productFutures = new ConcurrentHashMap<>();
     private String REQUEST_TOPIC = "product-request-topic";
 
@@ -108,7 +109,7 @@ public class OrderService {
         try {
             return future.get();
         } catch (Exception e) {
-            throw new RuntimeException("No product data available", e);
+            throw new RuntimeException(KAFKA_PRODUCT_NOT_AVAILABLE, e);
         } finally {
             productFutures.remove(productId);
         }
@@ -130,12 +131,12 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public List<OrderResponse> getOrdersFiltered(OrderStatuses status, LocalDate date, String sortBy) {
-        Specification<Order> specification = Specification.where(OrderSpecification.hasStatus(status))
-                .and(OrderSpecification.hasDate(date));
-        if ("asc".equalsIgnoreCase(sortBy)) {
+    public List<OrderResponse> getOrdersFiltered(FiltersDto dto) {
+        Specification<Order> specification = Specification.where(OrderSpecification.hasStatus(dto.getStatus()))
+                .and(OrderSpecification.hasDate(dto.getDate()));
+        if ("asc".equalsIgnoreCase(dto.getSortBy())) {
             specification = specification.and(OrderSpecification.orderByDateAsc());
-        } else if ("desc".equalsIgnoreCase(sortBy)) {
+        } else if ("desc".equalsIgnoreCase(dto.getSortBy())) {
             specification = specification.and(OrderSpecification.orderByDateDesc());
         }
         List<Order> orders = orderRepository.findAll(specification);

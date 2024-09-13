@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.trainee.orderservice.dto.FiltersDto;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
 import org.trainee.orderservice.dto.ProductOrderResponse;
@@ -42,11 +43,9 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrder(id));
     }
 
-    @GetMapping("/filtered")
-    public ResponseEntity<List<OrderResponse>> getFilteredOrders(@RequestParam(required = false) OrderStatuses status,
-                                                                 @RequestParam(required = false) LocalDate date,
-                                                                 @RequestParam(required = false) String sortBy) {
-        List<OrderResponse> orders = orderService.getOrdersFiltered(status,date,sortBy);
+    @PostMapping("/filtered")
+    public ResponseEntity<List<OrderResponse>> getFilteredOrders(@RequestParam(required = false) FiltersDto dto) {
+        List<OrderResponse> orders = orderService.getOrdersFiltered(dto);
         return ResponseEntity.ok(orders);
     }
 
