@@ -55,32 +55,6 @@ public class CartService {
         this.productClient = productClient;
     }
 
-    private String getCurrentUserToken() {
-        String url = KEYCLOAK_PORT + KEYClOAK_TOKEN_ENDPOINT;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("client_id", "user-service");
-        body.add("client_secret", clientSecret);
-        body.add("grant_type", "client_credentials");
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            String responseBody = response.getBody();
-            if (responseBody != null) {
-                ObjectMapper mapper = new ObjectMapper();
-                try {
-                    JsonNode jsonNode = mapper.readTree(responseBody);
-                    return jsonNode.get("access_token").asText();
-                } catch (JsonProcessingException e) {
-                    System.out.println("Bad token");
-                    ;
-                }
-            }
-        }
-        return "Token is empty!";
-    }
-
     public void addToCart(Long userId, CartDto cart) {
         for (CartItemsDto cartItem : cart.getCartItems()) {
             productClient.getProductById(cartItem.getProductId());
@@ -125,5 +99,31 @@ public class CartService {
         } else {
             throw new NoCacheException(cacheMessage);
         }
+    }
+
+    private String getCurrentUserToken() {
+        String url = KEYCLOAK_PORT + KEYClOAK_TOKEN_ENDPOINT;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("client_id", "user-service");
+        body.add("client_secret", clientSecret);
+        body.add("grant_type", "client_credentials");
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            String responseBody = response.getBody();
+            if (responseBody != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    JsonNode jsonNode = mapper.readTree(responseBody);
+                    return jsonNode.get("access_token").asText();
+                } catch (JsonProcessingException e) {
+                    System.out.println("Bad token");
+                    ;
+                }
+            }
+        }
+        return "Token is empty!";
     }
 }

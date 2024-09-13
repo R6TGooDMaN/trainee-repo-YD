@@ -1,9 +1,11 @@
 package org.trainee.orderservice.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.trainee.orderservice.clients.ProductClient;
+import org.trainee.orderservice.dto.FiltersDto;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
 import org.trainee.orderservice.dto.ProductOrderResponse;
@@ -17,14 +19,16 @@ import org.trainee.orderservice.model.Order;
 import org.trainee.orderservice.model.ProductOrders;
 import org.trainee.orderservice.repository.OrderRepository;
 import org.trainee.orderservice.repository.ProductOrderRepository;
+import org.trainee.orderservice.specifications.OrderSpecification;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -34,6 +38,7 @@ public class OrderService {
     public final ProductClient productClient;
     public final ProductOrderRepository productOrderRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final String KAFKA_PRODUCT_NOT_AVAILABLE = "No product data available";
     private final ConcurrentMap<Long, CompletableFuture<Long>> productFutures = new ConcurrentHashMap<>();
     private String REQUEST_TOPIC = "product-request-topic";
 
@@ -50,7 +55,7 @@ public class OrderService {
         Cart cart = CartMapper.mapToCart(cartService.getCart(orderRequest.getUserId()));
         Set<CartItems> itemsList = cart.getItems();
         Order order = OrderMapper.mapToOrder(orderRequest);
-        ProductOrders productOrders = OrderMapper.cartItemHandling(order,itemsList);
+        ProductOrders productOrders = OrderMapper.cartItemHandling(order, itemsList);
         productOrderRepository.save(productOrders);
         Order savedOrder = orderRepository.save(order);
         return OrderMapper.mapToOrderResponse(savedOrder);
@@ -64,9 +69,10 @@ public class OrderService {
 
     public List<OrderResponse> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
+
         return orders.stream()
                 .map(OrderMapper::mapToOrderResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public OrderResponse updateOrderStatus(Long id, OrderRequest orderRequest, OrderStatuses status) {
@@ -103,7 +109,7 @@ public class OrderService {
         try {
             return future.get();
         } catch (Exception e) {
-            throw new RuntimeException("Не удалось получить данные о продукте", e);
+            throw new RuntimeException(KAFKA_PRODUCT_NOT_AVAILABLE, e);
         } finally {
             productFutures.remove(productId);
         }
@@ -116,16 +122,28 @@ public class OrderService {
             future.complete(id);
         }
     }
-        public List<ProductOrderResponse> getProducts(Long productId) {
-            String productMessage = MessageFormat.format(ORDER_NOT_FOUND_MESSAGE, productClient.getOrderType(), productId);
-            Long id = requestProduct(productId);
-            List<ProductOrders> orderProducts = productOrderRepository.findAllByProductId(id);
-            List<ProductOrderResponse> responses = new ArrayList<>();
-            for (ProductOrders productOrders: orderProducts) {
-                responses.add(OrderMapper.productOrderToResponse(productOrders));
-            }
-            return responses;
+
+    public List<ProductOrderResponse> getProductsInOrder(Long orderId) {
+        String productMessage = MessageFormat.format(ORDER_NOT_FOUND_MESSAGE, productClient.getOrderType(), orderId);
+        List<ProductOrders> orderProducts = productOrderRepository.findAllByOrderId(orderId);
+        return orderProducts.stream()
+                .map(OrderMapper::productOrderToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<OrderResponse> getOrdersFiltered(FiltersDto dto) {
+        Specification<Order> specification = Specification.where(OrderSpecification.hasStatus(dto.getStatus()))
+                .and(OrderSpecification.hasDate(dto.getDate()));
+        if ("asc".equalsIgnoreCase(dto.getSortBy())) {
+            specification = specification.and(OrderSpecification.orderByDateAsc());
+        } else if ("desc".equalsIgnoreCase(dto.getSortBy())) {
+            specification = specification.and(OrderSpecification.orderByDateDesc());
         }
+        List<Order> orders = orderRepository.findAll(specification);
+        return orders.stream()
+                .map(OrderMapper::mapToOrderResponse)
+                .collect(Collectors.toList());
+    }
 
 
 }

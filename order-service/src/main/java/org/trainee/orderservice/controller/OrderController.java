@@ -10,13 +10,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.trainee.orderservice.dto.FiltersDto;
 import org.trainee.orderservice.dto.OrderRequest;
 import org.trainee.orderservice.dto.OrderResponse;
 import org.trainee.orderservice.dto.ProductOrderResponse;
 import org.trainee.orderservice.enums.OrderStatuses;
 import org.trainee.orderservice.service.OrderService;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -37,6 +41,12 @@ public class OrderController {
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrder(id));
+    }
+
+    @PostMapping("/filtered")
+    public ResponseEntity<List<OrderResponse>> getFilteredOrders(@RequestParam(required = false) FiltersDto dto) {
+        List<OrderResponse> orders = orderService.getOrdersFiltered(dto);
+        return ResponseEntity.ok(orders);
     }
 
     @PostMapping("/open")
@@ -69,9 +79,9 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{productId}/products")
-    public ResponseEntity<List<ProductOrderResponse>> getProductsInOrders(@PathVariable Long productId) {
-        List<ProductOrderResponse> productOrderResponses = orderService.getProducts(productId);
+    @GetMapping("/{orderId}/products")
+    public ResponseEntity<List<ProductOrderResponse>> getProductsInOrders(@PathVariable Long orderId) {
+        List<ProductOrderResponse> productOrderResponses = orderService.getProductsInOrder(orderId);
         return ResponseEntity.ok(productOrderResponses);
     }
 }
